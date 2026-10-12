@@ -76,6 +76,10 @@
         <ol id="ranking-lista">
           <li class="ranking-status">Ładowanie rankingu...</li>
         </ol>
+
+        <button id="wyczysc-ranking-btn" class="przycisk przycisk-odrzuc" style="margin-top: 12px; width: 100%;">
+          🗑 Wyczyść ranking
+        </button>
       </div>
       <button class="przycisk przycisk-udostepnij" id="przycisk-restart">🔄 Zagraj ponownie</button>
     </div>
@@ -208,6 +212,7 @@
     const graczImieInput = document.getElementById('gracz-imie');
     const zapiszWynikBtn = document.getElementById('zapisz-wynik-btn');
     const rankingLista = document.getElementById('ranking-lista');
+    const wyczyscRankingBtn = document.getElementById('wyczysc-ranking-btn');
 
     const RANKING_KEY = 'wyscig-ranking';
 
@@ -228,6 +233,11 @@
       const top5 = ranking.slice(0, 5);
       localStorage.setItem(RANKING_KEY, JSON.stringify(top5));
       return top5;
+    }
+
+    function wyczyscRanking() {
+      localStorage.removeItem(RANKING_KEY);
+      pobierzIOdswiezRanking();
     }
 
     function pobierzIOdswiezRanking() {
@@ -427,6 +437,15 @@
 
         if (zapisWynikuSekcja) {
           zapisWynikuSekcja.style.display = 'none';
+        }
+      });
+    }
+
+    if (wyczyscRankingBtn) {
+      wyczyscRankingBtn.addEventListener('click', () => {
+        const potwierdz = confirm('Na pewno usunąć cały ranking?');
+        if (potwierdz) {
+          wyczyscRanking();
         }
       });
     }
