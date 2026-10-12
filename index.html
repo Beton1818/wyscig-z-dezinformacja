@@ -1,28 +1,20 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <!-- Podstawowe metadane strony: kodowanie znaków oraz ustawienia dla urządzeń mobilnych -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Wyścig z Dezinformacją</title>
-  
-  <!-- Podpięcie zewnętrznego pliku ze stylami CSS -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  
   <div class="kontener-aplikacji">
-    
-    <!-- NAGŁÓWEK -->
     <header>
       <h1 class="naglowek-tytul">Wyścig z Dezinformacją</h1>
       <p class="naglowek-opis">Dzień 1 z 10 | Powstrzymaj Dezinformację</p>
-      <!-- Licznik czasu sterowany przez JavaScript -->
-      <div id="licznik-czasu" class="timer-wyswietlacz">Czas: 20s</div>
+      <div id="licznik-czasu" class="timer-wyswietlacz">Czas: 30s</div>
     </header>
 
-    <!-- SIATKA STATYSTYK -->
     <section class="siatka-statystyk">
       <div class="karta-statystyki">
         <div class="etykieta-statystyki">
@@ -33,7 +25,7 @@
           <div class="wypelnienie-postepu wypelnienie-prawdy"></div>
         </div>
       </div>
-      
+
       <div class="karta-statystyki">
         <div class="etykieta-statystyki">
           <span>Zaufanie</span>
@@ -45,7 +37,6 @@
       </div>
     </section>
 
-    <!-- KOMPAKTOWA KARTA POSTA -->
     <article class="karta-posta">
       <div class="informacje-o-autorze">
         <div class="awatar" id="post-awatar">P</div>
@@ -54,18 +45,16 @@
           <div class="identyfikator" id="post-handle">@nazwa_uzytkownika</div>
         </div>
       </div>
-      
+
       <div class="tresc-posta" id="post-tekst">Ładowanie posta...</div>
-      
-      <!-- Obrazek o zmniejszonej wysokości -->
+
       <img src="" class="obrazek-posta" id="post-obrazek" alt="Grafika posta">
-      
+
       <div class="wskazowka-zrodla" id="post-zrodlo">
         🔍 <strong>Źródło:</strong> <span id="tekst-zrodla">Brak danych</span>
       </div>
     </article>
 
-    <!-- PRZYCISKI INTERAKCJI -->
     <footer class="akcje">
       <button class="przycisk przycisk-sprawdz">🔍 Sprawdź źródło</button>
       <div class="glowne-przyciski">
@@ -74,7 +63,6 @@
       </div>
     </footer>
 
-    <!-- OKNO MODALNE (EKRAN KOŃCOWY) -->
     <div class="okno-modalne" id="ekran-koncowy">
       <h2 class="tytul-modalny">Koniec Gry</h2>
       <p class="opis-modalny" id="opis-wyniku">Opis wyniku...</p>
@@ -194,6 +182,7 @@
     let statystykaPrawdy = 50;
     let statystykaZaufania = 50;
     let ostatniWynik = 0;
+    let graZakonczona = false;
 
     const timerWyswietlacz = document.getElementById('licznik-czasu');
     const pasekPrawdy = document.querySelector('.wypelnienie-prawdy');
@@ -241,7 +230,7 @@
       return top5;
     }
 
-    async function pobierzIOdswiezRanking() {
+    function pobierzIOdswiezRanking() {
       if (!rankingLista) return;
 
       const ranking = pobierzRankingLokalnie();
@@ -264,9 +253,18 @@
       });
     }
 
+    function obliczWynikKoncowy() {
+      const iloscPostow = Math.max(1, aktualnyPostIndex + 1);
+      const wynikBazowy = (statystykaPrawdy + statystykaZaufania) * iloscPostow;
+      const bonusCzasu = Math.max(0, czasNaPost) * 5;
+      return Math.round(wynikBazowy + bonusCzasu);
+    }
+
     function uruchomEkranKoncowy(komunikat) {
+      if (graZakonczona) return;
+      graZakonczona = true;
       clearInterval(timerInterval);
-      ostatniWynik = Math.round((statystykaPrawdy + statystykaZaufania) * (aktualnyPostIndex + 1));
+      ostatniWynik = obliczWynikKoncowy();
 
       if (opisWyniku) {
         opisWyniku.innerText = `${komunikat} Zdobyłeś: ${ostatniWynik} pkt.`;
@@ -302,18 +300,21 @@
     function uruchomTimer() {
       clearInterval(timerInterval);
       timerInterval = setInterval(() => {
+        if (graZakonczona) return;
+
         czasNaPost--;
         if (timerWyswietlacz) timerWyswietlacz.innerText = `Czas: ${czasNaPost}s`;
 
         if (czasNaPost <= 0) {
           clearInterval(timerInterval);
-          statystykaZaufania = Math.max(0, statystykaZaufania - 10);
-          nastepnyPost();
+          uruchomEkranKoncowy('Przegrana! Nie zdążyłeś w czasie.');
         }
       }, 1000);
     }
 
     function zaladujPost(index) {
+      if (graZakonczona) return;
+
       if (index >= bazaPostów.length) {
         uruchomEkranKoncowy('Gratulacje! Przetrwałeś wszystkie dni i obroniłeś sieć!');
         return;
@@ -330,12 +331,15 @@
       if (elTekstZrodla) elTekstZrodla.innerText = post.zrodlo;
 
       czasNaPost = 30;
+      if (timerWyswietlacz) timerWyswietlacz.innerText = 'Czas: 30s';
       aktualizujInterfejs();
       uruchomTimer();
     }
 
     function nastepnyPost() {
-      if (statystykaPrawdy <= 0 || statystykaZaufania <= 0 || statystykaPrawdy >= 100) {
+      if (graZakonczona) return;
+
+      if (statystykaPrawdy <= 0 || statystykaZaufania <= 0 || statystykaPrawdy >= 100 || statystykaZaufania >= 100) {
         uruchomEkranKoncowy('Przegrana! Wskaźniki spadły do niebezpiecznego poziomu.');
         return;
       }
@@ -344,38 +348,57 @@
       zaladujPost(aktualnyPostIndex);
     }
 
+    function rozpatrzOdpowiedz(czyPoprawnie) {
+      if (graZakonczona) return;
+
+      if (czyPoprawnie) {
+        statystykaPrawdy = Math.min(100, statystykaPrawdy + 5);
+        statystykaZaufania = Math.min(100, statystykaZaufania + 4);
+      } else {
+        statystykaPrawdy = Math.max(0, statystykaPrawdy - 9);
+        statystykaZaufania = Math.max(0, statystykaZaufania - 9);
+      }
+
+      if (statystykaPrawdy <= 0 || statystykaZaufania <= 0 || statystykaPrawdy >= 100 || statystykaZaufania >= 100) {
+        uruchomEkranKoncowy('Przegrana! Wskaźniki spadły do niebezpiecznego poziomu.');
+        return;
+      }
+
+      nastepnyPost();
+    }
+
     if (przyciskSprawdz) {
       przyciskSprawdz.addEventListener('click', () => {
-        if (elZrodloKontener) elZrodloKontener.style.display = 'block';
-        statystykaZaufania = Math.max(0, statystykaZaufania - 5);
+        if (graZakonczona) return;
+
+        if (timerWyswietlacz) {
+          czasNaPost = Math.max(0, czasNaPost - 5);
+          timerWyswietlacz.innerText = `Czas: ${czasNaPost}s`;
+        }
+
+        statystykaZaufania = Math.min(100, statystykaZaufania + 5);
         aktualizujInterfejs();
+
+        if (czasNaPost <= 0) {
+          uruchomEkranKoncowy('Przegrana! Nie zdążyłeś w czasie po sprawdzeniu źródła.');
+          return;
+        }
       });
     }
 
     if (przyciskOdrzuc) {
       przyciskOdrzuc.addEventListener('click', () => {
         const post = bazaPostów[aktualnyPostIndex];
-        if (post.czyPrawda === false) {
-          statystykaPrawdy = Math.min(100, statystykaPrawdy + 10);
-          statystykaZaufania = Math.min(100, statystykaZaufania + 5);
-        } else {
-          statystykaPrawdy = Math.max(0, statystykaPrawdy - 15);
-          statystykaZaufania = Math.max(0, statystykaZaufania - 10);
-        }
-        nastepnyPost();
+        if (!post) return;
+        rozpatrzOdpowiedz(post.czyPrawda === false);
       });
     }
 
     if (przyciskUdostepnij) {
       przyciskUdostepnij.addEventListener('click', () => {
         const post = bazaPostów[aktualnyPostIndex];
-        if (post.czyPrawda === true) {
-          statystykaZaufania = Math.min(100, statystykaZaufania + 15);
-        } else {
-          statystykaPrawdy = Math.max(0, statystykaPrawdy - 20);
-          statystykaZaufania = Math.max(0, statystykaZaufania - 15);
-        }
-        nastepnyPost();
+        if (!post) return;
+        rozpatrzOdpowiedz(post.czyPrawda === true);
       });
     }
 
@@ -413,6 +436,8 @@
         aktualnyPostIndex = 0;
         statystykaPrawdy = 50;
         statystykaZaufania = 50;
+        ostatniWynik = 0;
+        graZakonczona = false;
         if (ekranKoncowy) ekranKoncowy.style.display = 'none';
         zaladujPost(aktualnyPostIndex);
       });
