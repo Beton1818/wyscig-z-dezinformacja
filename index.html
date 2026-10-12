@@ -460,8 +460,8 @@
 
     if (wyczyscRankingBtn) {
       wyczyscRankingBtn.addEventListener('click', () => {
-        const potwierdz = confirm('Na pewno usunąć cały ranking?');
-        if (potwierdz) {
+        const potwierdz = prompt('Na pewno usunąć cały ranking?');
+        if (potwierdz == ZSTiO) {
           kasujRankingJeżeliUprawniony();
         }
       });
