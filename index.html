@@ -277,298 +277,114 @@ function uruchomEkranKoncowy(komunikat) {
   pobierzIOdswiezRanking();
 }
 
-function zaladujPost(index) {
-  // Jeśli gracz przejdzie wszystkie posty z bazy, wygrywa grę
-  if (index >= bazaPostów.length) {
-    zakonczGre("Zwycięstwo!", "Znakomicie! Przeanalizowałeś wszystkie raporty.");
-    return;
-  }
-
-  // Aktualizacja licznika postów w nagłówku (np. Post 1 z 10)
-  const naglowekOpis = document.querySelector('.naglowek-opis');
-  if (naglowekOpis) {
-    naglowekOpis.textContent = `Post ${index + 1} z ${bazaPostów.length} | Powstrzymaj Dezinformację`;
-  }
-
-  const post = bazaPostów[index];
+// ==========================================================================
+// 4. FUNKCJE MECHANIKI GRY
+// ==========================================================================
+function aktualizujInterfejs() {
+  if(pasekPrawdy) pasekPrawdy.style.width = `${statystykaPrawdy}%`;
+  if(pasekZaufania) pasekZaufania.style.width = `${statystykaZaufania}%`;
+  if(etykietaPrawdy) etykietaPrawdy.innerText = `${statystykaPrawdy}%`;
+  if(etykietaZaufania) etykietaZaufania.innerText = `${statystykaZaufania}%`;
   
-  elAwatar.textContent = post.awatar;
-  elAutor.textContent = post.autor;
-  elHandle.textContent = post.handle;
-  elTekst.textContent = post.tekst;
-  elObrazek.src = post.obrazek;
-  elTekstZrodla.textContent = post.zrodlo;
-
-  elZrodloKontener.style.display = 'none';
-  przyciskSprawdz.disabled = false;
-
-  uruchomTimer();
+  const naglowekOpis = document.querySelector('.naglowek-opis');
+  if(naglowekOpis) naglowekOpis.innerText = `Dzień ${aktualnyPostIndex + 1} z 10 | Powstrzymaj Dezinformację`;
 }
 
 function uruchomTimer() {
   clearInterval(timerInterval);
-  czasNaPost = 30; // Resetowanie licznika do 30 sekund na nowy post
-  zaktualizujWyswietlaczTimera();
-
   timerInterval = setInterval(() => {
     czasNaPost--;
-    zaktualizujWyswietlaczTimera();
-
-    // ZMIANA: Koniec gry następuje natychmiast, gdy czas spadnie do zera
+    if (timerWyswietlacz) timerWyswietlacz.innerText = `Czas: ${czasNaPost}s`;
+    
     if (czasNaPost <= 0) {
       clearInterval(timerInterval);
-      zakonczGre("Koniec Czasu!", "Przegrana! Skończył Ci się czas na podjęcie decyzji.");
+      statystykaZaufania = Math.max(0, statystykaZaufania - 10);
+      nastepnyPost();
     }
   }, 1000);
 }
 
-function zaktualizujWyswietlaczTimera() {
-  timerWyswietlacz.textContent = `Czas: ${czasNaPost}s`;
-  if (czasNaPost <= 5) {
-    timerWyswietlacz.style.color = "var(--niebezpieczenstwo)"; // czerwony, gdy mało czasu
-  } else {
-    timerWyswietlacz.style.color = "var(--ostrzezenie)"; // pomarańczowy normalnie
-  }
-}
-
-function aktualizujPaski() {
-  statystykaPrawdy = Math.max(0, Math.min(100, statystykaPrawdy));
-  statystykaZaufania = Math.max(0, Math.min(100, statystykaZaufania));
-
-  pasekPrawdy.style.width = `${statystykaPrawdy}%`;
-  pasekZaufania.style.width = `${statystykaZaufania}%`;
-
-  etykietaPrawdy.textContent = `${statystykaPrawdy}%`;
-  etykietaZaufania.textContent = `${statystykaZaufania}%`;
-
-  // Sprawdzamy warunki przegranej
-  if (statystykaPrawdy === 0) {
-    zakonczGre("Przegrana!", "Prawda w sieci spadła do zera. Dezinformacja wygrała.");
-    return true; // Informujemy grę, że nastąpił koniec gry
-  } else if (statystykaZaufania === 0) {
-    zakonczGre("Przegrana!", "Społeczność całkowicie straciła do Ciebie zaufanie.");
-    return true; // Informujemy grę, że nastąpił koniec gry
-  }
-  
-  return false; // Gra toczy się dalej
-}
-
-function przejdzDoNastepnego() {
-  // Sprawdzamy najpierw, czy paski nie spadły do zera. 
-  // Jeśli funkcja aktualizujPaski() zwróci 'true' (czyli przegrana), przerywamy wykonywanie kodu i nie przechodzimy dalej!
-  if (aktualizujPaski()) {
+function zaladujPost(index) {
+  if (index >= bazaPostów.length) {
+    uruchomEkranKoncowy("Gratulacje! Przetrwałeś wszystkie dni i obroniłeś sieć!");
     return;
   }
+  
+  const post = bazaPostów[index];
+  if(elAwatar) elAwatar.innerText = post.awatar;
+  if(elAutor) elAutor.innerText = post.autor;
+  if(elHandle) elHandle.innerText = post.handle;
+  if(elTekst) elTekst.innerText = post.tekst;
+  if(elObrazek) elObrazek.src = post.obrazek;
+  
+  if(elZrodloKontener) elZrodloKontener.style.display = "none";
+  if(elTekstZrodla) elTekstZrodla.innerText = post.zrodlo;
+  
+  czasNaPost = 30;
+  aktualizujInterfejs();
+  uruchomTimer();
+}
 
+function nastepnyPost() {
+  if (statystykaPrawdy <= 0 || statystykaZaufania <= 0 || statystykaPrawdy >= 100) {
+    uruchomEkranKoncowy("Przegrana! Wskaźniki spadły do niebezpiecznego poziomu.");
+    return;
+  }
+  
   aktualnyPostIndex++;
   zaladujPost(aktualnyPostIndex);
 }
 
-function zakonczGre(tytulOkna, wiadomosc) {
-  clearInterval(timerInterval);
-  
-  // Szukamy nagłówka w oknie modalnym i zmieniamy go na "Zwycięstwo!" lub "Przegrana!"
-  const elTytulModalny = ekranKoncowy.querySelector('.tytul-modalny');
-  if (elTytulModalny) {
-    elTytulModalny.textContent = tytulOkna;
-  }
-
-  opisWyniku.textContent = `${wiadomosc} Twój wynik końcowy: Prawda: ${statystykaPrawdy}%, Zaufanie: ${statystykaZaufania}%.`;
-  ekranKoncowy.style.display = 'flex';
+// ==========================================================================
+// 5. OBSŁUGA KLIKNIĘĆ I START GRY
+// ==========================================================================
+if(przyciskSprawdz) {
+  przyciskSprawdz.addEventListener('click', () => {
+    if(elZrodloKontener) elZrodloKontener.style.display = "block";
+    statystykaZaufania = Math.max(0, statystykaZaufania - 5); 
+    aktualizujInterfejs();
+  });
 }
 
-// ==========================================================================
-// 4. LISTENERY ZDARZEŃ (Kliknięcia)
-// ==========================================================================
-
-// Kliknięcie: Sprawdź źródło
-przyciskSprawdz.addEventListener('click', () => {
-  czasNaPost = Math.max(0, czasNaPost - 5); // Czas -5 sekund
-  zaktualizujWyswietlaczTimera();
-
-  statystykaZaufania += 5; // Zaufanie +5%
-  aktualizujPaski();
-
-  elZrodloKontener.style.display = 'block'; // Pokazanie źródła
-  przyciskSprawdz.disabled = true; // Blokada ponownego użycia przy tym samym poście
-});
-
-// Kliknięcie: Odrzuć (Gracz twierdzi, że to FAKE NEWS)
-przyciskOdrzuc.addEventListener('click', () => {
-  const obecnyPost = bazaPostów[aktualnyPostIndex];
-  if (obecnyPost.czyPrawda === false) {
-    // Gracz miał rację (odrzucił fałsz) -> Prawda rośnie
-    statystykaPrawdy += 15;
-  } else {
-    // Błąd (odrzucił prawdę) -> Prawda i zaufanie spadają
-    statystykaPrawdy -= 15;
-    statystykaZaufania -= 10;
-  }
-  aktualizujPaski();
-  przejdzDoNastepnego();
-});
-
-// Kliknięcie: Udostępnij (Gracz twierdzi, że to PRAWDA)
-przyciskUdotepnij.addEventListener('click', () => {
-  const obecnyPost = bazaPostów[aktualnyPostIndex];
-  if (obecnyPost.czyPrawda === true) {
-    // Gracz miał rację (podał prawdę dalej) -> Zaufanie rośnie
-    statystykaZaufania += 15;
-    statystykaPrawdy += 5;
-  } else {
-    // Błąd (podał fake newsa dalej!) -> Drastyczny spadek wszystkiego
-    statystykaPrawdy -= 20;
-    statystykaZaufania -= 15;
-  }
-  aktualizujPaski();
-  przejdzDoNastepnego();
-});
-
-// Restart gry
-przyciskRestart.addEventListener('click', () => {
-  aktualnyPostIndex = 0;
-  statystykaPrawdy = 50;
-  statystykaZaufania = 50;
-  ekranKoncowy.style.display = 'none';
-  aktualizujPaski();
-  zaladujPost(aktualnyPostIndex);
-});
-
-// START GRY przy załadowaniu strony
-aktualizujPaski();
-zaladujPost(aktualnyPostIndex);
-// ==========================================================================
-// OBSŁUGA BAZY DANYCH I RANKINGU (FIREBASE)
-// ==========================================================================
-import { initializeApp } from "https://gstatic.com";
-import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit } from "https://gstatic.com";
-
-// TWOJA KONFIGURACJA Z PANELU FIREBASE (Podmień te dane!)
-const firebaseConfig = {
-  apiKey: "AIzaSyB16NMbr3TSnwwxOrbNirafjfueG6itw6w",
-  authDomain: "wyscig-z-dezinformacja.firebaseapp.com",
-  projectId: "wyscig-z-dezinformacja",
-  storageBucket: "wyscig-z-dezinformacja.firebasestorage.app",
-  messagingSenderId: "230219434748",
-  appId: "1:230219434748:web:b56fb93545e109639a2579",
-  measurementId: "G-K0Q3VX8VLC"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-let punktyDoZapisu = 0; // Zmienna przechowująca wynik bieżącej gry
-
-// Funkcja pobierająca wyniki z sieci i wrzucająca je do HTML
-async function pobierzIOdswiezRanking() {
-  const listaHTML = document.getElementById("ranking-lista");
-  listaHTML.innerHTML = '<li style="color: #9ca3af; text-align: center; list-style: none; font-size: 0.9rem;">Ładowanie wyników...</li>';
-
-  try {
-    const q = query(collection(db, "ranking"), orderBy("punkty", "desc"), limit(5));
-    const querySnapshot = await getDocs(q);
-    
-    listaHTML.innerHTML = ""; 
-
-    if (querySnapshot.empty) {
-      listaHTML.innerHTML = '<li style="color: #9ca3af; text-align: center; list-style: none; font-size: 0.9rem;">Brak wyników. Bądź pierwszy!</li>';
-      return;
+if(przyciskOdrzuc) {
+  przyciskOdrzuc.addEventListener('click', () => {
+    const post = bazaPostów[aktualnyPostIndex];
+    if (post.czyPrawda === false) {
+      statystykaPrawdy = Math.min(100, statystykaPrawdy + 10);
+      statystykaZaufania = Math.min(100, statystykaZaufania + 5);
+    } else {
+      statystykaPrawdy = Math.max(0, statystykaPrawdy - 15);
+      statystykaZaufania = Math.max(0, statystykaZaufania - 10);
     }
-
-    querySnapshot.forEach((doc) => {
-      const dane = doc.data();
-      const li = document.createElement("li");
-      
-      // Stylizacja wiersza
-      li.style.display = "flex";
-      li.style.justify = "space-between";
-      li.style.padding = "6px 8px";
-      li.style.borderBottom = "1px solid #1e293b";
-      li.style.fontSize = "0.95rem";
-      
-      li.innerHTML = `
-        <span style="font-weight: bold; color: #f1f5f9;">${dane.nick}</span>
-        <span style="color: #38bdf8; font-weight: bold;">${dane.punkty} pkt</span>
-      `;
-      listaHTML.appendChild(li);
-    });
-  } catch (error) {
-    console.error("Błąd Firebase:", error);
-    listaHTML.innerHTML = '<li style="color: #ef4444; text-align: center; list-style: none; font-size: 0.9rem;">Nie udało się załadować rankingu</li>';
-  }
+    nastepnyPost();
+  });
 }
 
-// Główna funkcja aktywująca ranking – wywołaj ją w momencie przegranej/wygranej!
-window.aktywujEkranKoncowy = function(zdobytePunkty) {
-  punktyDoZapisu = zdobytePunkty; 
-  
-  // Pokazanie formularza zapisu i wyczyszczenie pola
-  document.getElementById("zapis-wyniku-sekcja").style.display = "flex";
-  document.getElementById("gracz-imie").value = "";
-  
-  // Wymuszenie pobrania najświeższych wyników z bazy
-  pobierzIOdswiezRanking();
+if(przyciskUdostepnij) {
+  przyciskUdostepnij.addEventListener('click', () => {
+    const post = bazaPostów[aktualnyPostIndex];
+    if (post.czyPrawda === true) {
+      statystykaZaufania = Math.min(100, statystykaZaufania + 15);
+    } else {
+      statystykaPrawdy = Math.max(0, statystykaPrawdy - 20);
+      statystykaZaufania = Math.max(0, statystykaZaufania - 15);
+    }
+    nastepnyPost();
+  });
 }
 
-// Rejestracja kliknięcia przycisku "Zapisz"
-document.getElementById("zapisz-wynik-btn").addEventListener("click", async () => {
-  const nick = document.getElementById("gracz-imie").value.trim();
-  const przyciskZapisz = document.getElementById("zapisz-wynik-btn");
+if(przyciskRestart) {
+  przyciskRestart.addEventListener('click', () => {
+    aktualnyPostIndex = 0;
+    statystykaPrawdy = 50;
+    statystykaZaufania = 50;
+    if(ekranKoncowy) ekranKoncowy.style.display = "none";
+    zaladujPost(aktualnyPostIndex);
+  });
+}
 
-  if (!nick) {
-    alert("Proszę wpisać pseudonim!");
-    return;
-  }
-
-  try {
-    przyciskZapisz.disabled = true;
-    przyciskZapisz.innerText = "Zapisywanie...";
-
-    // Zapis do bazy danych
-    await addDoc(collection(db, "ranking"), {
-      nick: nick,
-      punkty: punktyDoZapisu,
-      data: new Date()
-    });
-
-    // Ukrycie sekcji wpisywania po udanym zapisie i aktualizacja listy liderów
-    document.getElementById("zapis-wyniku-sekcja").style.display = "none";
-    pobierzIOdswiezRanking();
-
-  } catch (error) {
-    console.error("Błąd zapisu:", error);
-    alert("Wystąpił problem z bazą danych. Spróbuj ponownie.");
-    przyciskZapisz.disabled = false;
-    przyciskZapisz.innerText = "Zapisz";
-  }
-});
-document.getElementById("zapisz-wynik-btn").addEventListener("click", async () => {
-  const nick = document.getElementById("gracz-imie").value.trim();
-  const przyciskZapisz = document.getElementById("zapisz-wynik-btn");
-
-  if (!nick) {
-    alert("Wpisz swój pseudonim przed zapisem!");
-    return;
-  }
-
-  try {
-    przyciskZapisz.disabled = true;
-    przyciskZapisz.innerText = "Zapisywanie...";
-
-    await addDoc(collection(db, "ranking"), {
-      nick: nick,
-      punkty: punktyDoZapisu,
-      data: new Date()
-    });
-
-    document.getElementById("zapis-wyniku-sekcja").style.display = "none";
-    pobierzIOdswiezRanking();
-  } catch (error) {
-    console.error("Błąd zapisu:", error);
-    przyciskZapisz.disabled = false;
-    przyciskZapisz.innerText = "Zapisz";
-  }
-});
-  </script>
+// URUCHOMIENIE GRY PRZY WEJŚCIU NA STRONĘ
+zaladujPost(aktualnyPostIndex);
+</script>
 </body>
 </html>
