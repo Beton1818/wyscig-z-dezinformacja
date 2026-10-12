@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <!-- Podstawowe metadane strony: kodowanie znaków oraz ustawienia dla urządzeń mobilnych -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wyścig z Dezinformacją</title>
+  
+  <!-- Podpięcie zewnętrznego pliku ze stylami CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  
+  <div class="kontener-aplikacji">
+    
+    <!-- NAGŁÓWEK -->
+    <header>
+      <h1 class="naglowek-tytul">Wyścig z Dezinformacją</h1>
+      <p class="naglowek-opis">Dzień 1 z 10 | Powstrzymaj Dezinformację</p>
+      <!-- Licznik czasu sterowany przez JavaScript -->
+      <div id="licznik-czasu" class="timer-wyswietlacz">Czas: 20s</div>
+    </header>
+
+    <!-- SIATKA STATYSTYK -->
+    <section class="siatka-statystyk">
+      <div class="karta-statystyki">
+        <div class="etykieta-statystyki">
+          <span>Prawda w sieci</span>
+          <span id="etykieta-prawdy">50%</span>
+        </div>
+        <div class="pasek-postepu">
+          <div class="wypelnienie-postepu wypelnienie-prawdy"></div>
+        </div>
+      </div>
+      
+      <div class="karta-statystyki">
+        <div class="etykieta-statystyki">
+          <span>Zaufanie</span>
+          <span id="etykieta-zaufania">50%</span>
+        </div>
+        <div class="pasek-postepu">
+          <div class="wypelnienie-postepu wypelnienie-zaufania"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- KOMPAKTOWA KARTA POSTA -->
+    <article class="karta-posta">
+      <div class="informacje-o-autorze">
+        <div class="awatar" id="post-awatar">P</div>
+        <div class="szczegoly-autora">
+          <div class="nazwa" id="post-autor">Nazwa Użytkownika</div>
+          <div class="identyfikator" id="post-handle">@nazwa_uzytkownika</div>
+        </div>
+      </div>
+      
+      <div class="tresc-posta" id="post-tekst">Ładowanie posta...</div>
+      
+      <!-- Obrazek o zmniejszonej wysokości -->
+      <img src="" class="obrazek-posta" id="post-obrazek" alt="Grafika posta">
+      
+      <div class="wskazowka-zrodla" id="post-zrodlo">
+        🔍 <strong>Źródło:</strong> <span id="tekst-zrodla">Brak danych</span>
+      </div>
+    </article>
+
+    <!-- PRZYCISKI INTERAKCJI -->
+    <footer class="akcje">
+      <button class="przycisk przycisk-sprawdz">🔍 Sprawdź źródło</button>
+      <div class="glowne-przyciski">
+        <button class="przycisk przycisk-odrzuc">✖ Dezinformacja</button>
+        <button class="przycisk przycisk-udostepnij">✔ Prawdziwa informacja</button>
+      </div>
+    </footer>
+
+    <!-- OKNO MODALNE (EKRAN KOŃCOWY) -->
+  <div class="okno-modalne" id="ekran-koncowy">
+      <h2 class="tytul-modalny">Koniec Gry</h2>
+      <p class="opis-modalny" id="opis-wyniku">Opis wyniku...</p>
+      <!-- Sekcja wpisywania pseudonimu (pokazuje się po zakończeniu gry) -->
+      <div id="zapis-wyniku-sekcja" class="sekcja-zapisu">
+        <input type="text" id="gracz-imie" placeholder="Wpisz swój nick..." maxlength="15">
+        <button id="zapisz-wynik-btn">Zapisz</button>
+      </div>
+
+    <!-- Kontener na tabelę liderów (ranking) -->
+      <div class="ranking-kontener">
+        <h3 class="ranking-tytul">🏆 TOP 5 OBROŃCÓW PRAWDY</h3>
+        <ol id="ranking-lista">
+            <li class="ranking-status">Ładowanie rankingu...</li>
+        </ol>
+      </div>
+      <button class="przycisk przycisk-udostepnij" id="przycisk-restart">🔄 Zagraj ponownie</button>
+    </div>
+
+  </div>
+
+
+  <script type="module">
+import { initializeApp } from "https://gstatic.com";
+import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit } from "https://gstatic.com";
+
+
+
+    const bazaPostów = [
+  {
+    autor: "EkoWojownik",
+    handle: "@eco_warrior",
+    awatar: "E",
+    tekst: "PILNE! Od jutra woda w kranach w całym kraju będzie zakręcana po godzinie 20:00!",
+    obrazek: "kran1.jpg",
+    czyPrawda: false,
+    zrodlo: "Użytkownik posiada 11 obserwujących i wiele clickbaitowych postów."
+  },
+  {
+    autor: "Centrum Zdrowia",
+    handle: "@zdrowie_info",
+    awatar: "Z",
+    tekst: "Główny Inspektorat Sanitarny ostrzega przed partią skażonych truskawek w sklepach.",
+    obrazek: "truskawki2.jpg",
+    czyPrawda: true,
+    zrodlo: "Użytkownik z weryfikacją i dużą liczbą obserwujących."
+  },
+  {
+    autor: "Nauka i Cywilizacja",
+    handle: "@nauka_cyw",
+    awatar: "N",
+    tekst: "Łazik NASA odkrył na Marsie struktury przypominające ziemskie piramidy!",
+    obrazek: "mars3.jpg",
+    czyPrawda: false,
+    zrodlo: "Zdjęcie wygenerowane przez AI."
+  },
+  {
+    autor: "TechInnowacje",
+    handle: "@tech_nowosci",
+    awatar: "T",
+    tekst: "Przełom! Polscy inżynierowie wydrukowali pierwsze sztuczne serce na drukarce 3D.",
+    obrazek: "serce4.jpg",
+    czyPrawda: true,
+    zrodlo: "Jeden z największych profilów technologicznych w Polsce."
+  },
+  {
+    autor: "SzybkiNews",
+    handle: "@szybki_news",
+    awatar: "S",
+    tekst: "Unia Europejska wprowadza nowy podatek od posiadania telefonów starszych niż 3 lata.",
+    obrazek: "tele5.jpg",
+    czyPrawda: false,
+    zrodlo: "To konto wstawia śrenio 90 postów dziennie."
+  },
+  {
+    autor: "Alert RCB",
+    handle: "@alert_rcb",
+    awatar: "A",
+    tekst: "Dzisiaj w województwie podkarpackim burze i grad.",
+    obrazek: "rcb6.jpg",
+    czyPrawda: true,
+    zrodlo: "Oficjalne konto Alertu RCB."
+  },
+  {
+    autor: "CryptoGuró",
+    handle: "@crypto_guró",
+    awatar: "C",
+    tekst: "Rząd potajemnie planuje zablokować wszystkie bankomaty w najbliższy piątek!",
+    obrazek: "bank7.jpg",
+    czyPrawda: false,
+    zrodlo: "Nazwa konta bardzo podobna do innego, znanego użytkownika."
+  },
+  {
+    autor: "Kultura i Historia",
+    handle: "@historia_pl",
+    awatar: "K",
+    tekst: "Podczas remontu starej kamienicy w Krakowie odkryto nieznany obraz Matejki.",
+    obrazek: "matejka8.jpg",
+    czyPrawda: true,
+    zrodlo: "Podobne informacje widnieją na oficjalnej stronie miasta Kraków."
+  },
+  {
+    autor: "ZdrowyStyl",
+    handle: "@fit_porady",
+    awatar: "Z",
+    tekst: "Jedzenie łyżeczki cynamonu rano całkowicie uodparnia organizm na grypę.",
+    obrazek: "cynamon9.jpg",
+    czyPrawda: false,
+    zrodlo: "W poście nie ma inforacji na temat konkretnych badań."
+  },
+  {
+    autor: "MiastoInfo",
+    handle: "@miasto_dzis",
+    awatar: "M",
+    tekst: "Od przyszłego miesiąca komunikacja miejska będzie darmowa dla studentów.",
+    obrazek: "podpis10.jpg",
+    czyPrawda: true,
+    zrodlo: "Zdjęcie przedstawia moment podpisania projektu przez burmistrza."
+  }
+];
+
+
+// ==========================================================================
+// 2. STAN GRY I ZMIENNE
+// ==========================================================================
+let aktualnyPostIndex = 0;
+let czasNaPost = 30;
+let timerInterval = null;
+let statystykaPrawdy = 50;
+let statystykaZaufania = 50;
+
+// Pobranie elementów DOM
+const timerWyswietlacz = document.getElementById('licznik-czasu');
+const pasekPrawdy = document.querySelector('.wypelnienie-prawdy');
+const pasekZaufania = document.querySelector('.wypelnienie-zaufania');
+const etykietaPrawdy = document.getElementById('etykieta-prawdy');
+const etykietaZaufania = document.getElementById('etykieta-zaufania');
+
+// Elementy karty posta
+const elAwatar = document.getElementById('post-awatar');
+const elAutor = document.getElementById('post-autor');
+const elHandle = document.getElementById('post-handle');
+const elTekst = document.getElementById('post-tekst');
+const elObrazek = document.getElementById('post-obrazek');
+const elZrodloKontener = document.getElementById('post-zrodlo');
+const elTekstZrodla = document.getElementById('tekst-zrodla');
+
+// Przyciski
+const przyciskSprawdz = document.querySelector('.przycisk-sprawdz');
+const przyciskOdrzuc = document.querySelector('.przycisk-odrzuc');
+const przyciskUdotepnij = document.querySelector('.przycisk-udostepnij');
+const ekranKoncowy = document.getElementById('ekran-koncowy');
+const przyciskRestart = document.getElementById('przycisk-restart');
+const opisWyniku = document.getElementById('opis-wyniku');
+
+// ==========================================================================
+// 3. FUNKCJE MECHANIKI GRY
+// ==========================================================================
+async function pobierzIOdswiezRanking() {
+  const listaHTML = document.getElementById("ranking-lista");
+  if(!listaHTML) return;
+  listaHTML.innerHTML = '<li class="ranking-status" style="color: #9ca3af; text-align: center; list-style: none;">Ładowanie...</li>';
+
+  try {
+    const q = query(collection(db, "ranking"), orderBy("punkty", "desc"), limit(5));
+    const querySnapshot = await getDocs(q);
+    listaHTML.innerHTML = ""; 
+
+    if (querySnapshot.empty) {
+      listaHTML.innerHTML = '<li class="ranking-status" style="color: #9ca3af; text-align: center; list-style: none;">Brak wyników. Zapisz się pierwszy!</li>';
+      return;
+    }
+
+    querySnapshot.forEach((doc) => {
+      const dane = doc.data();
+      const li = document.createElement("li");
+      li.style.display = "flex";
+      li.style.justify = "space-between";
+      li.style.padding = "6px 8px";
+      li.style.borderBottom = "1px solid #1e293b";
+      li.style.fontSize = "0.95rem";
+      li.innerHTML = `<span style="font-weight: bold; color: #f1f5f9;">${dane.nick}</span><span style="color: #38bdf8; font-weight: bold;">${dane.punkty} pkt</span>`;
+      listaHTML.appendChild(li);
+    });
+  } catch (error) {
+    console.error("Błąd Firebase:", error);
+  }
+}
+
+function uruchomEkranKoncowy(komunikat) {
+  clearInterval(timerInterval);
+  punktyDoZapisu = Math.round((statystykaPrawdy + statystykaZaufania) * (aktualnyPostIndex + 1));
+  
+  if(opisWyniku) opisWyniku.innerText = `${komunikat} Zdobyłeś: ${punktyDoZapisu} pkt.`;
+  if(ekranKoncowy) ekranKoncowy.style.display = "flex";
+
+  document.getElementById("zapis-wyniku-sekcja").style.display = "flex";
+  document.getElementById("gracz-imie").value = "";
+  
+  pobierzIOdswiezRanking();
+}
+
+function zaladujPost(index) {
+  // Jeśli gracz przejdzie wszystkie posty z bazy, wygrywa grę
+  if (index >= bazaPostów.length) {
+    zakonczGre("Zwycięstwo!", "Znakomicie! Przeanalizowałeś wszystkie raporty.");
+    return;
+  }
+
+  // Aktualizacja licznika postów w nagłówku (np. Post 1 z 10)
+  const naglowekOpis = document.querySelector('.naglowek-opis');
+  if (naglowekOpis) {
+    naglowekOpis.textContent = `Post ${index + 1} z ${bazaPostów.length} | Powstrzymaj Dezinformację`;
+  }
+
+  const post = bazaPostów[index];
+  
+  elAwatar.textContent = post.awatar;
+  elAutor.textContent = post.autor;
+  elHandle.textContent = post.handle;
+  elTekst.textContent = post.tekst;
+  elObrazek.src = post.obrazek;
+  elTekstZrodla.textContent = post.zrodlo;
+
+  elZrodloKontener.style.display = 'none';
+  przyciskSprawdz.disabled = false;
+
+  uruchomTimer();
+}
+
+function uruchomTimer() {
+  clearInterval(timerInterval);
+  czasNaPost = 30; // Resetowanie licznika do 30 sekund na nowy post
+  zaktualizujWyswietlaczTimera();
+
+  timerInterval = setInterval(() => {
+    czasNaPost--;
+    zaktualizujWyswietlaczTimera();
+
+    // ZMIANA: Koniec gry następuje natychmiast, gdy czas spadnie do zera
+    if (czasNaPost <= 0) {
+      clearInterval(timerInterval);
+      zakonczGre("Koniec Czasu!", "Przegrana! Skończył Ci się czas na podjęcie decyzji.");
+    }
+  }, 1000);
+}
+
+function zaktualizujWyswietlaczTimera() {
+  timerWyswietlacz.textContent = `Czas: ${czasNaPost}s`;
+  if (czasNaPost <= 5) {
+    timerWyswietlacz.style.color = "var(--niebezpieczenstwo)"; // czerwony, gdy mało czasu
+  } else {
+    timerWyswietlacz.style.color = "var(--ostrzezenie)"; // pomarańczowy normalnie
+  }
+}
+
+function aktualizujPaski() {
+  statystykaPrawdy = Math.max(0, Math.min(100, statystykaPrawdy));
+  statystykaZaufania = Math.max(0, Math.min(100, statystykaZaufania));
+
+  pasekPrawdy.style.width = `${statystykaPrawdy}%`;
+  pasekZaufania.style.width = `${statystykaZaufania}%`;
+
+  etykietaPrawdy.textContent = `${statystykaPrawdy}%`;
+  etykietaZaufania.textContent = `${statystykaZaufania}%`;
+
+  // Sprawdzamy warunki przegranej
+  if (statystykaPrawdy === 0) {
+    zakonczGre("Przegrana!", "Prawda w sieci spadła do zera. Dezinformacja wygrała.");
+    return true; // Informujemy grę, że nastąpił koniec gry
+  } else if (statystykaZaufania === 0) {
+    zakonczGre("Przegrana!", "Społeczność całkowicie straciła do Ciebie zaufanie.");
+    return true; // Informujemy grę, że nastąpił koniec gry
+  }
+  
+  return false; // Gra toczy się dalej
+}
+
+function przejdzDoNastepnego() {
+  // Sprawdzamy najpierw, czy paski nie spadły do zera. 
+  // Jeśli funkcja aktualizujPaski() zwróci 'true' (czyli przegrana), przerywamy wykonywanie kodu i nie przechodzimy dalej!
+  if (aktualizujPaski()) {
+    return;
+  }
+
+  aktualnyPostIndex++;
+  zaladujPost(aktualnyPostIndex);
+}
+
+function zakonczGre(tytulOkna, wiadomosc) {
+  clearInterval(timerInterval);
+  
+  // Szukamy nagłówka w oknie modalnym i zmieniamy go na "Zwycięstwo!" lub "Przegrana!"
+  const elTytulModalny = ekranKoncowy.querySelector('.tytul-modalny');
+  if (elTytulModalny) {
+    elTytulModalny.textContent = tytulOkna;
+  }
+
+  opisWyniku.textContent = `${wiadomosc} Twój wynik końcowy: Prawda: ${statystykaPrawdy}%, Zaufanie: ${statystykaZaufania}%.`;
+  ekranKoncowy.style.display = 'flex';
+}
+
+// ==========================================================================
+// 4. LISTENERY ZDARZEŃ (Kliknięcia)
+// ==========================================================================
+
+// Kliknięcie: Sprawdź źródło
+przyciskSprawdz.addEventListener('click', () => {
+  czasNaPost = Math.max(0, czasNaPost - 5); // Czas -5 sekund
+  zaktualizujWyswietlaczTimera();
+
+  statystykaZaufania += 5; // Zaufanie +5%
+  aktualizujPaski();
+
+  elZrodloKontener.style.display = 'block'; // Pokazanie źródła
+  przyciskSprawdz.disabled = true; // Blokada ponownego użycia przy tym samym poście
+});
+
+// Kliknięcie: Odrzuć (Gracz twierdzi, że to FAKE NEWS)
+przyciskOdrzuc.addEventListener('click', () => {
+  const obecnyPost = bazaPostów[aktualnyPostIndex];
+  if (obecnyPost.czyPrawda === false) {
+    // Gracz miał rację (odrzucił fałsz) -> Prawda rośnie
+    statystykaPrawdy += 15;
+  } else {
+    // Błąd (odrzucił prawdę) -> Prawda i zaufanie spadają
+    statystykaPrawdy -= 15;
+    statystykaZaufania -= 10;
+  }
+  aktualizujPaski();
+  przejdzDoNastepnego();
+});
+
+// Kliknięcie: Udostępnij (Gracz twierdzi, że to PRAWDA)
+przyciskUdotepnij.addEventListener('click', () => {
+  const obecnyPost = bazaPostów[aktualnyPostIndex];
+  if (obecnyPost.czyPrawda === true) {
+    // Gracz miał rację (podał prawdę dalej) -> Zaufanie rośnie
+    statystykaZaufania += 15;
+    statystykaPrawdy += 5;
+  } else {
+    // Błąd (podał fake newsa dalej!) -> Drastyczny spadek wszystkiego
+    statystykaPrawdy -= 20;
+    statystykaZaufania -= 15;
+  }
+  aktualizujPaski();
+  przejdzDoNastepnego();
+});
+
+// Restart gry
+przyciskRestart.addEventListener('click', () => {
+  aktualnyPostIndex = 0;
+  statystykaPrawdy = 50;
+  statystykaZaufania = 50;
+  ekranKoncowy.style.display = 'none';
+  aktualizujPaski();
+  zaladujPost(aktualnyPostIndex);
+});
+
+// START GRY przy załadowaniu strony
+aktualizujPaski();
+zaladujPost(aktualnyPostIndex);
+// ==========================================================================
+// OBSŁUGA BAZY DANYCH I RANKINGU (FIREBASE)
+// ==========================================================================
+import { initializeApp } from "https://gstatic.com";
+import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit } from "https://gstatic.com";
+
+// TWOJA KONFIGURACJA Z PANELU FIREBASE (Podmień te dane!)
+const firebaseConfig = {
+  apiKey: "AIzaSyB16NMbr3TSnwwxOrbNirafjfueG6itw6w",
+  authDomain: "wyscig-z-dezinformacja.firebaseapp.com",
+  projectId: "wyscig-z-dezinformacja",
+  storageBucket: "wyscig-z-dezinformacja.firebasestorage.app",
+  messagingSenderId: "230219434748",
+  appId: "1:230219434748:web:b56fb93545e109639a2579",
+  measurementId: "G-K0Q3VX8VLC"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+let punktyDoZapisu = 0; // Zmienna przechowująca wynik bieżącej gry
+
+// Funkcja pobierająca wyniki z sieci i wrzucająca je do HTML
+async function pobierzIOdswiezRanking() {
+  const listaHTML = document.getElementById("ranking-lista");
+  listaHTML.innerHTML = '<li style="color: #9ca3af; text-align: center; list-style: none; font-size: 0.9rem;">Ładowanie wyników...</li>';
+
+  try {
+    const q = query(collection(db, "ranking"), orderBy("punkty", "desc"), limit(5));
+    const querySnapshot = await getDocs(q);
+    
+    listaHTML.innerHTML = ""; 
+
+    if (querySnapshot.empty) {
+      listaHTML.innerHTML = '<li style="color: #9ca3af; text-align: center; list-style: none; font-size: 0.9rem;">Brak wyników. Bądź pierwszy!</li>';
+      return;
+    }
+
+    querySnapshot.forEach((doc) => {
+      const dane = doc.data();
+      const li = document.createElement("li");
+      
+      // Stylizacja wiersza
+      li.style.display = "flex";
+      li.style.justify = "space-between";
+      li.style.padding = "6px 8px";
+      li.style.borderBottom = "1px solid #1e293b";
+      li.style.fontSize = "0.95rem";
+      
+      li.innerHTML = `
+        <span style="font-weight: bold; color: #f1f5f9;">${dane.nick}</span>
+        <span style="color: #38bdf8; font-weight: bold;">${dane.punkty} pkt</span>
+      `;
+      listaHTML.appendChild(li);
+    });
+  } catch (error) {
+    console.error("Błąd Firebase:", error);
+    listaHTML.innerHTML = '<li style="color: #ef4444; text-align: center; list-style: none; font-size: 0.9rem;">Nie udało się załadować rankingu</li>';
+  }
+}
+
+// Główna funkcja aktywująca ranking – wywołaj ją w momencie przegranej/wygranej!
+window.aktywujEkranKoncowy = function(zdobytePunkty) {
+  punktyDoZapisu = zdobytePunkty; 
+  
+  // Pokazanie formularza zapisu i wyczyszczenie pola
+  document.getElementById("zapis-wyniku-sekcja").style.display = "flex";
+  document.getElementById("gracz-imie").value = "";
+  
+  // Wymuszenie pobrania najświeższych wyników z bazy
+  pobierzIOdswiezRanking();
+}
+
+// Rejestracja kliknięcia przycisku "Zapisz"
+document.getElementById("zapisz-wynik-btn").addEventListener("click", async () => {
+  const nick = document.getElementById("gracz-imie").value.trim();
+  const przyciskZapisz = document.getElementById("zapisz-wynik-btn");
+
+  if (!nick) {
+    alert("Proszę wpisać pseudonim!");
+    return;
+  }
+
+  try {
+    przyciskZapisz.disabled = true;
+    przyciskZapisz.innerText = "Zapisywanie...";
+
+    // Zapis do bazy danych
+    await addDoc(collection(db, "ranking"), {
+      nick: nick,
+      punkty: punktyDoZapisu,
+      data: new Date()
+    });
+
+    // Ukrycie sekcji wpisywania po udanym zapisie i aktualizacja listy liderów
+    document.getElementById("zapis-wyniku-sekcja").style.display = "none";
+    pobierzIOdswiezRanking();
+
+  } catch (error) {
+    console.error("Błąd zapisu:", error);
+    alert("Wystąpił problem z bazą danych. Spróbuj ponownie.");
+    przyciskZapisz.disabled = false;
+    przyciskZapisz.innerText = "Zapisz";
+  }
+});
+document.getElementById("zapisz-wynik-btn").addEventListener("click", async () => {
+  const nick = document.getElementById("gracz-imie").value.trim();
+  const przyciskZapisz = document.getElementById("zapisz-wynik-btn");
+
+  if (!nick) {
+    alert("Wpisz swój pseudonim przed zapisem!");
+    return;
+  }
+
+  try {
+    przyciskZapisz.disabled = true;
+    przyciskZapisz.innerText = "Zapisywanie...";
+
+    await addDoc(collection(db, "ranking"), {
+      nick: nick,
+      punkty: punktyDoZapisu,
+      data: new Date()
+    });
+
+    document.getElementById("zapis-wyniku-sekcja").style.display = "none";
+    pobierzIOdswiezRanking();
+  } catch (error) {
+    console.error("Błąd zapisu:", error);
+    przyciskZapisz.disabled = false;
+    przyciskZapisz.innerText = "Zapisz";
+  }
+});
+  </script>
+</body>
+</html>

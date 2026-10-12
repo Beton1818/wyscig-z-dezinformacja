@@ -1,0 +1,412 @@
+
+:root {
+  --kolor-tla: #0f172a;            /* Ciemne tło strony */
+  --tlo-karty: #1e293b;            /* Tło ramek/kart */
+  --tlo-kontenera: #111827;        /* Tło telefonu */
+  --akcent: #38bdf8;               /* Jasnoniebieski kolor akcentujący */
+  --tekst: #f8fafc;                /* Główny kolor tekstu */
+  --tekst-stonowany: #9ca3af;      /* Szary, mniej rzucający się w oczy tekst */
+  --niebezpieczenstwo: #ef4444;    /* Czerwony (przegrana / odrzuć) */
+  --sukces: #22c55e;               /* Zielony (wygrana / udostępnij) */
+  --ostrzezenie: #f59e0b;          /* Pomarańczowy (wskazówka) */
+}
+
+/* ==========================================================================
+   2. RESET STYLÓW ORAZ USTAWIENIA PODSTAWOWE
+   ========================================================================== */
+* {
+  box-sizing: border-box; 
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: var(--kolor-tla);
+  color: var(--tekst);
+  display: flex;
+  justify-content: center; 
+  align-items: center;     
+  min-height: 100vh;       
+  padding: 12px;           
+}
+
+/* ==========================================================================
+   3. GŁÓWNY KONTENER (Ekran telefonu / optymalna szerokość)
+   ========================================================================== */
+.kontener-aplikacji {
+  width: 100%;
+  max-width: 480px;        /* ZMNIEJSZONO: Idealna szerokość nowoczesnego smartfona */
+  background: var(--tlo-kontenera);
+  border-radius: 24px;
+  border: 2px solid #1f2937;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+  padding: 24px;           /* Zoptymalizowany padding wewnętrzny */
+  
+  display: flex;
+  flex-direction: column; 
+  gap: 20px;              
+  position: relative;     
+  overflow: hidden;
+}
+
+/* ==========================================================================
+   4. NAGŁÓWEK
+   ========================================================================== */
+.naglowek-tytul {
+  font-size: 1.4rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--akcent);
+  margin-bottom: 4px;
+  letter-spacing: 0.5px;
+}
+
+.naglowek-opis {
+  font-size: 0.85rem;
+  text-align: center;
+  color: var(--tekst-stonowany);
+}
+
+/* ==========================================================================
+   5. SIATKA STATYSTYK I PASKI POSTĘPU
+   ========================================================================== */
+.siatka-statystyk {
+  display: grid;
+  grid-template-columns: 1fr 1fr; 
+  gap: 12px;
+}
+
+.karta-statystyki {
+  background: var(--tlo-karty);
+  padding: 12px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border: 1px solid #334155;
+}
+
+.etykieta-statystyki {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--tekst-stonowany);
+  display: flex;
+  justify-content: space-between;
+}
+
+.pasek-postepu {
+  width: 100%;
+  height: 8px;
+  background: #374151;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.wypelnienie-postepu {
+  height: 100%;
+  width: 50%;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.wypelnienie-prawdy {
+  background-color: var(--akcent);
+}
+
+.wypelnienie-zaufania {
+  background-color: var(--sukces);
+}
+
+/* ==========================================================================
+   6. KARTA POSTA (Zoptymalizowana pod jakość obrazka)
+   ========================================================================== */
+.karta-posta {
+  background: var(--tlo-karty);
+  border-radius: 16px;
+  padding: 20px;   
+  border: 1px solid #334155;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 280px; 
+}
+
+.informacje-o-autorze {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.awatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--akcent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: var(--kolor-tla);
+  flex-shrink: 0; 
+}
+
+.szczegoly-autora .nazwa {
+  font-weight: bold;
+  font-size: 0.95rem;
+}
+
+.szczegoly-autora .identyfikator {
+  font-size: 0.8rem;
+  color: var(--tekst-stonowany);
+}
+
+.tresc-posta {
+  font-size: 1.1rem; 
+  line-height: 1.5;
+  color: #f1f5f9;
+}
+
+/* NAPRAWIONY OBRAZEK: Idealnie responsywny, nie traci jakości i ładnie się centruje */
+.obrazek-posta {
+  width: 100%;             
+  height: 220px;           /* Stały, ładny kadr obrazka */
+  object-fit: cover;       /* Przycięcie zachowujące oryginalne proporcje bez rozciągania */
+  object-position: center; /* Wyśrodkowanie kadru */
+  border-radius: 12px;     
+  display: block;
+  margin: 4px 0;
+}
+
+.wskazowka-zrodla {
+  background: var(--kolor-tla);
+  border-left: 3px solid var(--ostrzezenie);
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: #fbbf24;
+  line-height: 1.4;
+  display: none; /* JS aktywuje */
+}
+
+/* ==========================================================================
+   7. PRZYCISKI AKCJI
+   ========================================================================== */
+.akcje {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.glowne-przyciski {
+  display: flex;
+  gap: 12px;
+}
+
+.przycisk {
+  flex: 1;
+  padding: 16px 12px; 
+  border: none;
+  border-radius: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 1rem;    
+  transition: transform 0.1s ease, background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.przycisk:active {
+  transform: scale(0.97);
+}
+
+.przycisk-odrzuc {
+  background: var(--niebezpieczenstwo);
+  color: white;
+}
+.przycisk-odrzuc:hover {
+  background: #dc2626;
+}
+
+.przycisk-udostepnij {
+  background: var(--sukces);
+  color: white;
+}
+.przycisk-udostepnij:hover {
+  background: #16a34a;
+}
+
+.przycisk-sprawdz {
+  background: transparent;
+  border: 1px solid var(--akcent);
+  color: var(--akcent);
+  width: 100%;
+}
+.przycisk-sprawdz:hover {
+  background: rgba(56, 189, 248, 0.1);
+}
+
+.przycisk:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ==========================================================================
+   8. EKRAN KOŃCOWY (Okno Modalne)
+   ========================================================================== */
+.okno-modalne {
+  display: none; 
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(15, 23, 42, 0.98);
+  border-radius: 24px;
+  padding: 40px 24px;       /* Zwiększony padding góra/dół */
+  flex-direction: column;
+  justify-content: center;  /* Centrowanie zawartości w pionie */
+  align-items: center;      /* Centrowanie zawartości w poziomie */
+  gap: 24px;                /* Wyraźne odstępy między tekstami a przyciskiem */
+  z-index: 10;
+}
+
+#przycisk-restart {
+  flex: none !important;    /* Wyłącza automatyczne rozciąganie flexboxa */
+  width: auto;              /* Szerokość dopasowana do tekstu */
+  min-width: 200px;         /* Minimalna, estetyczna szerokość przycisku */
+  padding: 14px 28px;
+  background-color: blue;
+}
+
+.tytul-modalny {
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.opis-modalny {
+  font-size: 0.95rem;
+  color: #9ca3af;
+  line-height: 1.5;
+}
+
+.timer-wyswietlacz {
+  text-align: center; 
+  font-size: 1.6rem; 
+  font-weight: bold; 
+  color: var(--ostrzezenie); 
+  margin: 5px 0;
+  transition: color 0.3s ease;
+}
+
+/* ==========================================================================
+   9. ZAAWANSOWANA RESPONSYWNOŚĆ (Media Queries)
+   ========================================================================== */
+@media (max-width: 380px) {
+  .kontener-aplikacji {
+    padding: 16px;
+    gap: 14px;
+  }
+
+  .glowne-przyciski {
+    flex-direction: column; 
+    gap: 8px;
+  }
+
+  .siatka-statystyk {
+    grid-template-columns: 1fr; 
+  }
+}
+
+@media (max-height: 660px) {
+  body {
+    align-items: flex-start; 
+  }
+}
+
+
+/*Wyniki*/
+/* Styl dla sekcji wpisywania nicku */
+.sekcja-zapisu {
+  width: 100%;
+  display: flex;
+  gap: 10px;
+  margin-bottom: 5px;
+}
+
+.sekcja-zapisu input {
+  flex: 1;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #334155;
+  background: var(--tlo-karty);
+  color: var(--tekst);
+  font-size: 1rem;
+}
+
+.sekcja-zapisu input:focus {
+  outline: none;
+  border-color: var(--akcent);
+}
+
+.sekcja-zapisu button {
+  padding: 12px 20px;
+  background: var(--sukces);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1rem;
+  transition: opacity 0.2s;
+}
+
+.sekcja-zapisu button:hover {
+  opacity: 0.9;
+}
+
+/* Styl dla kontenera rankingu */
+.ranking-kontener {
+  width: 100%;
+  background: var(--tlo-kontenera);
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid #334155;
+  box-sizing: border-box;
+}
+
+.ranking-tytul {
+  color: var(--akcent);
+  font-size: 1.1rem;
+  margin-bottom: 12px;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+#ranking-lista {
+  list-style-position: inside;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Styl pojedynczego wiersza z graczem */
+.wiersz-rankingu {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 8px;
+  border-bottom: 1px solid #1e293b;
+  font-size: 0.95rem;
+}
+
+.wiersz-rankingu .nick {
+  font-weight: bold;
+  color: #f1f5f9;
+}
+
+.wiersz-rankingu .punkty {
+  color: var(--akcent);
+  font-weight: bold;
+}
+
+.ranking-status {
+  color: var(--tekst-stonowany);
+  text-align: center;
+  list-style: none;
+  font-size: 0.9rem;
+}
