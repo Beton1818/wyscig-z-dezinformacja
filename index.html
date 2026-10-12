@@ -188,6 +188,9 @@
     let ostatniWynik = 0;
     let graZakonczona = false;
 
+    // flaga: czy dla bieżącego posta już użyto "Sprawdź źródło"
+    let sprawdzonoDlaBiezacegoPosta = false;
+
     const timerWyswietlacz = document.getElementById('licznik-czasu');
     const pasekPrawdy = document.querySelector('.wypelnienie-prawdy');
     const pasekZaufania = document.querySelector('.wypelnienie-zaufania');
@@ -354,7 +357,11 @@
       if (elTekst) elTekst.innerText = post.tekst;
       if (elObrazek) elObrazek.src = post.obrazek;
 
+      // Ukrywamy wskazówkę źródła dla nowego posta i resetujemy flagę oraz odblokowujemy przycisk
       if (elZrodloKontener) elZrodloKontener.style.display = 'none';
+      sprawdzonoDlaBiezacegoPosta = false;
+      if (przyciskSprawdz) przyciskSprawdz.disabled = false;
+
       if (elTekstZrodla) elTekstZrodla.innerText = post.zrodlo;
 
       czasNaPost = 30;
@@ -397,6 +404,14 @@
     if (przyciskSprawdz) {
       przyciskSprawdz.addEventListener('click', () => {
         if (graZakonczona) return;
+
+        // Pozwól sprawdzić źródło tylko raz na post
+        if (sprawdzonoDlaBiezacegoPosta) return;
+        sprawdzonoDlaBiezacegoPosta = true;
+        if (przyciskSprawdz) przyciskSprawdz.disabled = true;
+
+        // Pokaż wskazówkę źródła
+        if (elZrodloKontener) elZrodloKontener.style.display = 'block';
 
         if (timerWyswietlacz) {
           czasNaPost = Math.max(0, czasNaPost - 5);
