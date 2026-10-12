@@ -379,11 +379,11 @@
       if (graZakonczona) return;
 
       if (czyPoprawnie) {
-        statystykaPrawdy = Math.min(100, statystykaPrawdy + 5);
-        statystykaZaufania = Math.min(100, statystykaZaufania + 4);
+        statystykaPrawdy = Math.min(100, statystykaPrawdy + 6);
+        statystykaZaufania = Math.min(100, statystykaZaufania + 5);
       } else {
-        statystykaPrawdy = Math.max(0, statystykaPrawdy - 9);
-        statystykaZaufania = Math.max(0, statystykaZaufania - 9);
+        statystykaPrawdy = Math.max(0, statystykaPrawdy - 10);
+        statystykaZaufania = Math.max(0, statystykaZaufania - 10);
       }
 
       if (statystykaPrawdy <= 0 || statystykaZaufania <= 0 || statystykaPrawdy >= 100 || statystykaZaufania >= 100) {
@@ -460,7 +460,7 @@
 
     if (wyczyscRankingBtn) {
       wyczyscRankingBtn.addEventListener('click', () => {
-        const potwierdz = confrim('Na pewno usunąć cały ranking?');
+        const potwierdz = confirm('Na pewno usunąć cały ranking?');
         if (potwierdz) {
           kasujRankingJeżeliUprawniony();
         }
