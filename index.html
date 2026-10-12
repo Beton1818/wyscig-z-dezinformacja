@@ -215,6 +215,7 @@
     const wyczyscRankingBtn = document.getElementById('wyczysc-ranking-btn');
 
     const RANKING_KEY = 'wyscig-ranking';
+    const ADMIN_PASSWORD = 'ZSTIO';
 
     function pobierzRankingLokalnie() {
       try {
@@ -235,9 +236,25 @@
       return top5;
     }
 
-    function wyczyscRanking() {
+    function kasujRankingJeżeliUprawniony() {
+      // Proste sprawdzenie hasła po stronie klienta. Hasło jest widoczne w kodzie —
+      // jeśli potrzebujesz bezpieczeństwa, przenieś sprawdzenie na serwer.
+      const wpisaneHaslo = prompt('Wpisz hasło administratora, aby usunąć ranking:');
+      if (wpisaneHaslo === null) return; // użytkownik anulował
+
+      if (wpisaneHaslo.trim() !== ADMIN_PASSWORD) {
+        alert('Błędne hasło. Brak uprawnień do usunięcia rankingu.');
+        return;
+      }
+
       localStorage.removeItem(RANKING_KEY);
       pobierzIOdswiezRanking();
+      alert('Ranking został wyczyszczony.');
+    }
+
+    function wyczyscRanking() {
+      // zachowujemy istniejącą nazwę funkcji, ale delegujemy do sprawdzenia hasła
+      kasujRankingJeżeliUprawniony();
     }
 
     function pobierzIOdswiezRanking() {
@@ -445,7 +462,7 @@
       wyczyscRankingBtn.addEventListener('click', () => {
         const potwierdz = confirm('Na pewno usunąć cały ranking?');
         if (potwierdz) {
-          wyczyscRanking();
+          kasujRankingJeżeliUprawniony();
         }
       });
     }
@@ -462,6 +479,7 @@
       });
     }
 
+    pobierzIOdswiezRanking();
     zaladujPost(aktualnyPostIndex);
   </script>
 </body>
