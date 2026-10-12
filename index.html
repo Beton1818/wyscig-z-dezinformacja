@@ -75,20 +75,18 @@
     </footer>
 
     <!-- OKNO MODALNE (EKRAN KOŃCOWY) -->
-  <div class="okno-modalne" id="ekran-koncowy">
+    <div class="okno-modalne" id="ekran-koncowy">
       <h2 class="tytul-modalny">Koniec Gry</h2>
       <p class="opis-modalny" id="opis-wyniku">Opis wyniku...</p>
-      <!-- Sekcja wpisywania pseudonimu (pokazuje się po zakończeniu gry) -->
-      <div id="zapis-wyniku-sekcja" class="sekcja-zapisu">
+      <div id="zapis-wyniku-sekcja" class="sekcja-zapisu" style="display: none;">
         <input type="text" id="gracz-imie" placeholder="Wpisz swój nick..." maxlength="15">
         <button id="zapisz-wynik-btn">Zapisz</button>
       </div>
 
-    <!-- Kontener na tabelę liderów (ranking) -->
       <div class="ranking-kontener">
         <h3 class="ranking-tytul">🏆 TOP 5 OBROŃCÓW PRAWDY</h3>
         <ol id="ranking-lista">
-            <li class="ranking-status">Ładowanie rankingu...</li>
+          <li class="ranking-status">Ładowanie rankingu...</li>
         </ol>
       </div>
       <button class="przycisk przycisk-udostepnij" id="przycisk-restart">🔄 Zagraj ponownie</button>
@@ -96,295 +94,331 @@
 
   </div>
 
-
-  <script type="module">
-import { initializeApp } from "https://gstatic.com";
-import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit } from "https://gstatic.com";
-
-
-
+  <script>
     const bazaPostów = [
-  {
-    autor: "EkoWojownik",
-    handle: "@eco_warrior",
-    awatar: "E",
-    tekst: "PILNE! Od jutra woda w kranach w całym kraju będzie zakręcana po godzinie 20:00!",
-    obrazek: "kran1.jpg",
-    czyPrawda: false,
-    zrodlo: "Użytkownik posiada 11 obserwujących i wiele clickbaitowych postów."
-  },
-  {
-    autor: "Centrum Zdrowia",
-    handle: "@zdrowie_info",
-    awatar: "Z",
-    tekst: "Główny Inspektorat Sanitarny ostrzega przed partią skażonych truskawek w sklepach.",
-    obrazek: "truskawki2.jpg",
-    czyPrawda: true,
-    zrodlo: "Użytkownik z weryfikacją i dużą liczbą obserwujących."
-  },
-  {
-    autor: "Nauka i Cywilizacja",
-    handle: "@nauka_cyw",
-    awatar: "N",
-    tekst: "Łazik NASA odkrył na Marsie struktury przypominające ziemskie piramidy!",
-    obrazek: "mars3.jpg",
-    czyPrawda: false,
-    zrodlo: "Zdjęcie wygenerowane przez AI."
-  },
-  {
-    autor: "TechInnowacje",
-    handle: "@tech_nowosci",
-    awatar: "T",
-    tekst: "Przełom! Polscy inżynierowie wydrukowali pierwsze sztuczne serce na drukarce 3D.",
-    obrazek: "serce4.jpg",
-    czyPrawda: true,
-    zrodlo: "Jeden z największych profilów technologicznych w Polsce."
-  },
-  {
-    autor: "SzybkiNews",
-    handle: "@szybki_news",
-    awatar: "S",
-    tekst: "Unia Europejska wprowadza nowy podatek od posiadania telefonów starszych niż 3 lata.",
-    obrazek: "tele5.jpg",
-    czyPrawda: false,
-    zrodlo: "To konto wstawia śrenio 90 postów dziennie."
-  },
-  {
-    autor: "Alert RCB",
-    handle: "@alert_rcb",
-    awatar: "A",
-    tekst: "Dzisiaj w województwie podkarpackim burze i grad.",
-    obrazek: "rcb6.jpg",
-    czyPrawda: true,
-    zrodlo: "Oficjalne konto Alertu RCB."
-  },
-  {
-    autor: "CryptoGuró",
-    handle: "@crypto_guró",
-    awatar: "C",
-    tekst: "Rząd potajemnie planuje zablokować wszystkie bankomaty w najbliższy piątek!",
-    obrazek: "bank7.jpg",
-    czyPrawda: false,
-    zrodlo: "Nazwa konta bardzo podobna do innego, znanego użytkownika."
-  },
-  {
-    autor: "Kultura i Historia",
-    handle: "@historia_pl",
-    awatar: "K",
-    tekst: "Podczas remontu starej kamienicy w Krakowie odkryto nieznany obraz Matejki.",
-    obrazek: "matejka8.jpg",
-    czyPrawda: true,
-    zrodlo: "Podobne informacje widnieją na oficjalnej stronie miasta Kraków."
-  },
-  {
-    autor: "ZdrowyStyl",
-    handle: "@fit_porady",
-    awatar: "Z",
-    tekst: "Jedzenie łyżeczki cynamonu rano całkowicie uodparnia organizm na grypę.",
-    obrazek: "cynamon9.jpg",
-    czyPrawda: false,
-    zrodlo: "W poście nie ma inforacji na temat konkretnych badań."
-  },
-  {
-    autor: "MiastoInfo",
-    handle: "@miasto_dzis",
-    awatar: "M",
-    tekst: "Od przyszłego miesiąca komunikacja miejska będzie darmowa dla studentów.",
-    obrazek: "podpis10.jpg",
-    czyPrawda: true,
-    zrodlo: "Zdjęcie przedstawia moment podpisania projektu przez burmistrza."
-  }
-];
+      {
+        autor: "EkoWojownik",
+        handle: "@eco_warrior",
+        awatar: "E",
+        tekst: "PILNE! Od jutra woda w kranach w całym kraju będzie zakręcana po godzinie 20:00!",
+        obrazek: "kran1.jpg",
+        czyPrawda: false,
+        zrodlo: "Użytkownik posiada 11 obserwujących i wiele clickbaitowych postów."
+      },
+      {
+        autor: "Centrum Zdrowia",
+        handle: "@zdrowie_info",
+        awatar: "Z",
+        tekst: "Główny Inspektorat Sanitarny ostrzega przed partią skażonych truskawek w sklepach.",
+        obrazek: "truskawki2.jpg",
+        czyPrawda: true,
+        zrodlo: "Użytkownik z weryfikacją i dużą liczbą obserwujących."
+      },
+      {
+        autor: "Nauka i Cywilizacja",
+        handle: "@nauka_cyw",
+        awatar: "N",
+        tekst: "Łazik NASA odkrył na Marsie struktury przypominające ziemskie piramidy!",
+        obrazek: "mars3.jpg",
+        czyPrawda: false,
+        zrodlo: "Zdjęcie wygenerowane przez AI."
+      },
+      {
+        autor: "TechInnowacje",
+        handle: "@tech_nowosci",
+        awatar: "T",
+        tekst: "Przełom! Polscy inżynierowie wydrukowali pierwsze sztuczne serce na drukarce 3D.",
+        obrazek: "serce4.jpg",
+        czyPrawda: true,
+        zrodlo: "Jeden z największych profilów technologicznych w Polsce."
+      },
+      {
+        autor: "SzybkiNews",
+        handle: "@szybki_news",
+        awatar: "S",
+        tekst: "Unia Europejska wprowadza nowy podatek od posiadania telefonów starszych niż 3 lata.",
+        obrazek: "tele5.jpg",
+        czyPrawda: false,
+        zrodlo: "To konto wstawia średnio 90 postów dziennie."
+      },
+      {
+        autor: "Alert RCB",
+        handle: "@alert_rcb",
+        awatar: "A",
+        tekst: "Dzisiaj w województwie podkarpackim burze i grad.",
+        obrazek: "rcb6.jpg",
+        czyPrawda: true,
+        zrodlo: "Oficjalne konto Alertu RCB."
+      },
+      {
+        autor: "CryptoGuró",
+        handle: "@crypto_guró",
+        awatar: "C",
+        tekst: "Rząd potajemnie planuje zablokować wszystkie bankomaty w najbliższy piątek!",
+        obrazek: "bank7.jpg",
+        czyPrawda: false,
+        zrodlo: "Nazwa konta bardzo podobna do innego, znanego użytkownika."
+      },
+      {
+        autor: "Kultura i Historia",
+        handle: "@historia_pl",
+        awatar: "K",
+        tekst: "Podczas remontu starej kamienicy w Krakowie odkryto nieznany obraz Matejki.",
+        obrazek: "matejka8.jpg",
+        czyPrawda: true,
+        zrodlo: "Podobne informacje widnieją na oficjalnej stronie miasta Kraków."
+      },
+      {
+        autor: "ZdrowyStyl",
+        handle: "@fit_porady",
+        awatar: "Z",
+        tekst: "Jedzenie łyżeczki cynamonu rano całkowicie uodparnia organizm na grypę.",
+        obrazek: "cynamon9.jpg",
+        czyPrawda: false,
+        zrodlo: "W poście nie ma informacji na temat konkretnych badań."
+      },
+      {
+        autor: "MiastoInfo",
+        handle: "@miasto_dzis",
+        awatar: "M",
+        tekst: "Od przyszłego miesiąca komunikacja miejska będzie darmowa dla studentów.",
+        obrazek: "podpis10.jpg",
+        czyPrawda: true,
+        zrodlo: "Zdjęcie przedstawia moment podpisania projektu przez burmistrza."
+      }
+    ];
 
+    let aktualnyPostIndex = 0;
+    let czasNaPost = 30;
+    let timerInterval = null;
+    let statystykaPrawdy = 50;
+    let statystykaZaufania = 50;
+    let ostatniWynik = 0;
 
-// ==========================================================================
-// 2. STAN GRY I ZMIENNE
-// ==========================================================================
-let aktualnyPostIndex = 0;
-let czasNaPost = 30;
-let timerInterval = null;
-let statystykaPrawdy = 50;
-let statystykaZaufania = 50;
+    const timerWyswietlacz = document.getElementById('licznik-czasu');
+    const pasekPrawdy = document.querySelector('.wypelnienie-prawdy');
+    const pasekZaufania = document.querySelector('.wypelnienie-zaufania');
+    const etykietaPrawdy = document.getElementById('etykieta-prawdy');
+    const etykietaZaufania = document.getElementById('etykieta-zaufania');
 
-// Pobranie elementów DOM
-const timerWyswietlacz = document.getElementById('licznik-czasu');
-const pasekPrawdy = document.querySelector('.wypelnienie-prawdy');
-const pasekZaufania = document.querySelector('.wypelnienie-zaufania');
-const etykietaPrawdy = document.getElementById('etykieta-prawdy');
-const etykietaZaufania = document.getElementById('etykieta-zaufania');
+    const elAwatar = document.getElementById('post-awatar');
+    const elAutor = document.getElementById('post-autor');
+    const elHandle = document.getElementById('post-handle');
+    const elTekst = document.getElementById('post-tekst');
+    const elObrazek = document.getElementById('post-obrazek');
+    const elZrodloKontener = document.getElementById('post-zrodlo');
+    const elTekstZrodla = document.getElementById('tekst-zrodla');
 
-// Elementy karty posta
-const elAwatar = document.getElementById('post-awatar');
-const elAutor = document.getElementById('post-autor');
-const elHandle = document.getElementById('post-handle');
-const elTekst = document.getElementById('post-tekst');
-const elObrazek = document.getElementById('post-obrazek');
-const elZrodloKontener = document.getElementById('post-zrodlo');
-const elTekstZrodla = document.getElementById('tekst-zrodla');
+    const przyciskSprawdz = document.querySelector('.przycisk-sprawdz');
+    const przyciskOdrzuc = document.querySelector('.przycisk-odrzuc');
+    const przyciskUdostepnij = document.querySelector('.przycisk-udostepnij');
+    const ekranKoncowy = document.getElementById('ekran-koncowy');
+    const przyciskRestart = document.getElementById('przycisk-restart');
+    const opisWyniku = document.getElementById('opis-wyniku');
+    const zapisWynikuSekcja = document.getElementById('zapis-wyniku-sekcja');
+    const graczImieInput = document.getElementById('gracz-imie');
+    const zapiszWynikBtn = document.getElementById('zapisz-wynik-btn');
+    const rankingLista = document.getElementById('ranking-lista');
 
-// Przyciski
-const przyciskSprawdz = document.querySelector('.przycisk-sprawdz');
-const przyciskOdrzuc = document.querySelector('.przycisk-odrzuc');
-const przyciskUdotepnij = document.querySelector('.przycisk-udostepnij');
-const ekranKoncowy = document.getElementById('ekran-koncowy');
-const przyciskRestart = document.getElementById('przycisk-restart');
-const opisWyniku = document.getElementById('opis-wyniku');
+    const RANKING_KEY = 'wyscig-ranking';
 
-// ==========================================================================
-// 3. FUNKCJE MECHANIKI GRY
-// ==========================================================================
-async function pobierzIOdswiezRanking() {
-  const listaHTML = document.getElementById("ranking-lista");
-  if(!listaHTML) return;
-  listaHTML.innerHTML = '<li class="ranking-status" style="color: #9ca3af; text-align: center; list-style: none;">Ładowanie...</li>';
-
-  try {
-    const q = query(collection(db, "ranking"), orderBy("punkty", "desc"), limit(5));
-    const querySnapshot = await getDocs(q);
-    listaHTML.innerHTML = ""; 
-
-    if (querySnapshot.empty) {
-      listaHTML.innerHTML = '<li class="ranking-status" style="color: #9ca3af; text-align: center; list-style: none;">Brak wyników. Zapisz się pierwszy!</li>';
-      return;
+    function pobierzRankingLokalnie() {
+      try {
+        const dane = JSON.parse(localStorage.getItem(RANKING_KEY) || '[]');
+        return Array.isArray(dane) ? dane : [];
+      } catch (error) {
+        console.warn('Błąd odczytu rankingu z localStorage:', error);
+        return [];
+      }
     }
 
-    querySnapshot.forEach((doc) => {
-      const dane = doc.data();
-      const li = document.createElement("li");
-      li.style.display = "flex";
-      li.style.justify = "space-between";
-      li.style.padding = "6px 8px";
-      li.style.borderBottom = "1px solid #1e293b";
-      li.style.fontSize = "0.95rem";
-      li.innerHTML = `<span style="font-weight: bold; color: #f1f5f9;">${dane.nick}</span><span style="color: #38bdf8; font-weight: bold;">${dane.punkty} pkt</span>`;
-      listaHTML.appendChild(li);
-    });
-  } catch (error) {
-    console.error("Błąd Firebase:", error);
-  }
-}
+    function zapiszRankingLokalnie(nowyWpis) {
+      const ranking = pobierzRankingLokalnie();
+      ranking.push(nowyWpis);
+      ranking.sort((a, b) => b.punkty - a.punkty);
+      const top5 = ranking.slice(0, 5);
+      localStorage.setItem(RANKING_KEY, JSON.stringify(top5));
+      return top5;
+    }
 
-function uruchomEkranKoncowy(komunikat) {
-  clearInterval(timerInterval);
-  punktyDoZapisu = Math.round((statystykaPrawdy + statystykaZaufania) * (aktualnyPostIndex + 1));
-  
-  if(opisWyniku) opisWyniku.innerText = `${komunikat} Zdobyłeś: ${punktyDoZapisu} pkt.`;
-  if(ekranKoncowy) ekranKoncowy.style.display = "flex";
+    async function pobierzIOdswiezRanking() {
+      if (!rankingLista) return;
 
-  document.getElementById("zapis-wyniku-sekcja").style.display = "flex";
-  document.getElementById("gracz-imie").value = "";
-  
-  pobierzIOdswiezRanking();
-}
+      const ranking = pobierzRankingLokalnie();
+      rankingLista.innerHTML = '';
 
-// ==========================================================================
-// 4. FUNKCJE MECHANIKI GRY
-// ==========================================================================
-function aktualizujInterfejs() {
-  if(pasekPrawdy) pasekPrawdy.style.width = `${statystykaPrawdy}%`;
-  if(pasekZaufania) pasekZaufania.style.width = `${statystykaZaufania}%`;
-  if(etykietaPrawdy) etykietaPrawdy.innerText = `${statystykaPrawdy}%`;
-  if(etykietaZaufania) etykietaZaufania.innerText = `${statystykaZaufania}%`;
-  
-  const naglowekOpis = document.querySelector('.naglowek-opis');
-  if(naglowekOpis) naglowekOpis.innerText = `Dzień ${aktualnyPostIndex + 1} z 10 | Powstrzymaj Dezinformację`;
-}
+      if (!ranking.length) {
+        rankingLista.innerHTML = '<li class="ranking-status" style="color: #9ca3af; text-align: center; list-style: none;">Brak wyników. Zapisz się pierwszy!</li>';
+        return;
+      }
 
-function uruchomTimer() {
-  clearInterval(timerInterval);
-  timerInterval = setInterval(() => {
-    czasNaPost--;
-    if (timerWyswietlacz) timerWyswietlacz.innerText = `Czas: ${czasNaPost}s`;
-    
-    if (czasNaPost <= 0) {
+      ranking.forEach((entry) => {
+        const li = document.createElement('li');
+        li.style.display = 'flex';
+        li.style.justifyContent = 'space-between';
+        li.style.padding = '6px 8px';
+        li.style.borderBottom = '1px solid #1e293b';
+        li.style.fontSize = '0.95rem';
+        li.innerHTML = `<span style="font-weight: bold; color: #f1f5f9;">${entry.nick}</span><span style="color: #38bdf8; font-weight: bold;">${entry.punkty} pkt</span>`;
+        rankingLista.appendChild(li);
+      });
+    }
+
+    function uruchomEkranKoncowy(komunikat) {
       clearInterval(timerInterval);
-      statystykaZaufania = Math.max(0, statystykaZaufania - 10);
-      nastepnyPost();
+      ostatniWynik = Math.round((statystykaPrawdy + statystykaZaufania) * (aktualnyPostIndex + 1));
+
+      if (opisWyniku) {
+        opisWyniku.innerText = `${komunikat} Zdobyłeś: ${ostatniWynik} pkt.`;
+      }
+
+      if (ekranKoncowy) {
+        ekranKoncowy.style.display = 'flex';
+      }
+
+      if (zapisWynikuSekcja) {
+        zapisWynikuSekcja.style.display = 'flex';
+      }
+
+      if (graczImieInput) {
+        graczImieInput.value = '';
+      }
+
+      pobierzIOdswiezRanking();
     }
-  }, 1000);
-}
 
-function zaladujPost(index) {
-  if (index >= bazaPostów.length) {
-    uruchomEkranKoncowy("Gratulacje! Przetrwałeś wszystkie dni i obroniłeś sieć!");
-    return;
-  }
-  
-  const post = bazaPostów[index];
-  if(elAwatar) elAwatar.innerText = post.awatar;
-  if(elAutor) elAutor.innerText = post.autor;
-  if(elHandle) elHandle.innerText = post.handle;
-  if(elTekst) elTekst.innerText = post.tekst;
-  if(elObrazek) elObrazek.src = post.obrazek;
-  
-  if(elZrodloKontener) elZrodloKontener.style.display = "none";
-  if(elTekstZrodla) elTekstZrodla.innerText = post.zrodlo;
-  
-  czasNaPost = 30;
-  aktualizujInterfejs();
-  uruchomTimer();
-}
+    function aktualizujInterfejs() {
+      if (pasekPrawdy) pasekPrawdy.style.width = `${statystykaPrawdy}%`;
+      if (pasekZaufania) pasekZaufania.style.width = `${statystykaZaufania}%`;
+      if (etykietaPrawdy) etykietaPrawdy.innerText = `${statystykaPrawdy}%`;
+      if (etykietaZaufania) etykietaZaufania.innerText = `${statystykaZaufania}%`;
 
-function nastepnyPost() {
-  if (statystykaPrawdy <= 0 || statystykaZaufania <= 0 || statystykaPrawdy >= 100) {
-    uruchomEkranKoncowy("Przegrana! Wskaźniki spadły do niebezpiecznego poziomu.");
-    return;
-  }
-  
-  aktualnyPostIndex++;
-  zaladujPost(aktualnyPostIndex);
-}
-
-// ==========================================================================
-// 5. OBSŁUGA KLIKNIĘĆ I START GRY
-// ==========================================================================
-if(przyciskSprawdz) {
-  przyciskSprawdz.addEventListener('click', () => {
-    if(elZrodloKontener) elZrodloKontener.style.display = "block";
-    statystykaZaufania = Math.max(0, statystykaZaufania - 5); 
-    aktualizujInterfejs();
-  });
-}
-
-if(przyciskOdrzuc) {
-  przyciskOdrzuc.addEventListener('click', () => {
-    const post = bazaPostów[aktualnyPostIndex];
-    if (post.czyPrawda === false) {
-      statystykaPrawdy = Math.min(100, statystykaPrawdy + 10);
-      statystykaZaufania = Math.min(100, statystykaZaufania + 5);
-    } else {
-      statystykaPrawdy = Math.max(0, statystykaPrawdy - 15);
-      statystykaZaufania = Math.max(0, statystykaZaufania - 10);
+      const naglowekOpis = document.querySelector('.naglowek-opis');
+      if (naglowekOpis) {
+        naglowekOpis.innerText = `Dzień ${aktualnyPostIndex + 1} z 10 | Powstrzymaj Dezinformację`;
+      }
     }
-    nastepnyPost();
-  });
-}
 
-if(przyciskUdostepnij) {
-  przyciskUdostepnij.addEventListener('click', () => {
-    const post = bazaPostów[aktualnyPostIndex];
-    if (post.czyPrawda === true) {
-      statystykaZaufania = Math.min(100, statystykaZaufania + 15);
-    } else {
-      statystykaPrawdy = Math.max(0, statystykaPrawdy - 20);
-      statystykaZaufania = Math.max(0, statystykaZaufania - 15);
+    function uruchomTimer() {
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        czasNaPost--;
+        if (timerWyswietlacz) timerWyswietlacz.innerText = `Czas: ${czasNaPost}s`;
+
+        if (czasNaPost <= 0) {
+          clearInterval(timerInterval);
+          statystykaZaufania = Math.max(0, statystykaZaufania - 10);
+          nastepnyPost();
+        }
+      }, 1000);
     }
-    nastepnyPost();
-  });
-}
 
-if(przyciskRestart) {
-  przyciskRestart.addEventListener('click', () => {
-    aktualnyPostIndex = 0;
-    statystykaPrawdy = 50;
-    statystykaZaufania = 50;
-    if(ekranKoncowy) ekranKoncowy.style.display = "none";
+    function zaladujPost(index) {
+      if (index >= bazaPostów.length) {
+        uruchomEkranKoncowy('Gratulacje! Przetrwałeś wszystkie dni i obroniłeś sieć!');
+        return;
+      }
+
+      const post = bazaPostów[index];
+      if (elAwatar) elAwatar.innerText = post.awatar;
+      if (elAutor) elAutor.innerText = post.autor;
+      if (elHandle) elHandle.innerText = post.handle;
+      if (elTekst) elTekst.innerText = post.tekst;
+      if (elObrazek) elObrazek.src = post.obrazek;
+
+      if (elZrodloKontener) elZrodloKontener.style.display = 'none';
+      if (elTekstZrodla) elTekstZrodla.innerText = post.zrodlo;
+
+      czasNaPost = 30;
+      aktualizujInterfejs();
+      uruchomTimer();
+    }
+
+    function nastepnyPost() {
+      if (statystykaPrawdy <= 0 || statystykaZaufania <= 0 || statystykaPrawdy >= 100) {
+        uruchomEkranKoncowy('Przegrana! Wskaźniki spadły do niebezpiecznego poziomu.');
+        return;
+      }
+
+      aktualnyPostIndex++;
+      zaladujPost(aktualnyPostIndex);
+    }
+
+    if (przyciskSprawdz) {
+      przyciskSprawdz.addEventListener('click', () => {
+        if (elZrodloKontener) elZrodloKontener.style.display = 'block';
+        statystykaZaufania = Math.max(0, statystykaZaufania - 5);
+        aktualizujInterfejs();
+      });
+    }
+
+    if (przyciskOdrzuc) {
+      przyciskOdrzuc.addEventListener('click', () => {
+        const post = bazaPostów[aktualnyPostIndex];
+        if (post.czyPrawda === false) {
+          statystykaPrawdy = Math.min(100, statystykaPrawdy + 10);
+          statystykaZaufania = Math.min(100, statystykaZaufania + 5);
+        } else {
+          statystykaPrawdy = Math.max(0, statystykaPrawdy - 15);
+          statystykaZaufania = Math.max(0, statystykaZaufania - 10);
+        }
+        nastepnyPost();
+      });
+    }
+
+    if (przyciskUdostepnij) {
+      przyciskUdostepnij.addEventListener('click', () => {
+        const post = bazaPostów[aktualnyPostIndex];
+        if (post.czyPrawda === true) {
+          statystykaZaufania = Math.min(100, statystykaZaufania + 15);
+        } else {
+          statystykaPrawdy = Math.max(0, statystykaPrawdy - 20);
+          statystykaZaufania = Math.max(0, statystykaZaufania - 15);
+        }
+        nastepnyPost();
+      });
+    }
+
+    if (zapiszWynikBtn) {
+      zapiszWynikBtn.addEventListener('click', () => {
+        const nick = (graczImieInput && graczImieInput.value || '').trim();
+        if (!nick) {
+          alert('Wpisz nick, aby zapisać wynik!');
+          return;
+        }
+
+        const wpis = { nick, punkty: ostatniWynik };
+        const ranking = zapiszRankingLokalnie(wpis);
+        rankingLista.innerHTML = '';
+
+        ranking.forEach((entry) => {
+          const li = document.createElement('li');
+          li.style.display = 'flex';
+          li.style.justifyContent = 'space-between';
+          li.style.padding = '6px 8px';
+          li.style.borderBottom = '1px solid #1e293b';
+          li.style.fontSize = '0.95rem';
+          li.innerHTML = `<span style="font-weight: bold; color: #f1f5f9;">${entry.nick}</span><span style="color: #38bdf8; font-weight: bold;">${entry.punkty} pkt</span>`;
+          rankingLista.appendChild(li);
+        });
+
+        if (zapisWynikuSekcja) {
+          zapisWynikuSekcja.style.display = 'none';
+        }
+      });
+    }
+
+    if (przyciskRestart) {
+      przyciskRestart.addEventListener('click', () => {
+        aktualnyPostIndex = 0;
+        statystykaPrawdy = 50;
+        statystykaZaufania = 50;
+        if (ekranKoncowy) ekranKoncowy.style.display = 'none';
+        zaladujPost(aktualnyPostIndex);
+      });
+    }
+
     zaladujPost(aktualnyPostIndex);
-  });
-}
-
-// URUCHOMIENIE GRY PRZY WEJŚCIU NA STRONĘ
-zaladujPost(aktualnyPostIndex);
-</script>
+  </script>
 </body>
 </html>
