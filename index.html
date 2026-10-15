@@ -84,8 +84,8 @@
 
   </div>
 
-  <!-- Przycisk do wyczyszczenia rankingu: mniej widoczny i umieszczony na dole strony. -->
-  <button id="wyczysc-ranking-btn" class="przycisk przycisk-odrzuc" style="position:fixed; right:12px; bottom:12px; opacity:0.55; font-size:0.85rem; padding:6px 10px; border-radius:8px; background: rgba(30,41,59,0.5); color:#e2e8f0; border: none; width: auto; max-width: 220px; z-index: 1000; box-shadow: none;">
+  <!-- Przycisk do wyczyszczenia rankingu: mniej widoczny i umieszczony na dole strony. Ukryty domyślnie - pojawi się dopiero po zakończeniu gry. -->
+  <button id="wyczysc-ranking-btn" class="przycisk przycisk-odrzuc" style="display:none; position:fixed; right:12px; bottom:12px; opacity:0.55; font-size:0.85rem; padding:6px 10px; border-radius:8px; background: rgba(30,41,59,0.5); color:#e2e8f0; border: none; width: auto; max-width: 220px; z-index: 1000; box-shadow: none;">
     🗑 Wyczyść ranking
   </button>
 
@@ -316,6 +316,9 @@
       }
 
       pobierzIOdswiezRanking();
+
+      // pokaż przycisk wyczyszczenia rankingu tylko po zakończeniu gry
+      if (wyczyscRankingBtn) wyczyscRankingBtn.style.display = 'block';
     }
 
     function aktualizujInterfejs() {
@@ -466,7 +469,7 @@
           li.style.padding = '6px 8px';
           li.style.borderBottom = '1px solid #1e293b';
           li.style.fontSize = '0.95rem';
-          li.innerHTML = `<span style="font-weight: bold; color: #f1f5f9;">${entry.nick}</span><span style="color: #38bdf8; font-weight: bold;">${entry.punkty} pkt</span>`;
+          li.innerHTML = `<span style=\"font-weight: bold; color: #f1f5f9;\">${entry.nick}</span><span style=\"color: #38bdf8; font-weight: bold;\">${entry.punkty} pkt</span>`;
           rankingLista.appendChild(li);
         });
 
@@ -493,6 +496,8 @@
         ostatniWynik = 0;
         graZakonczona = false;
         if (ekranKoncowy) ekranKoncowy.style.display = 'none';
+        // ukryj przycisk wyczyszczenia rankingu przy restarcie gry
+        if (wyczyscRankingBtn) wyczyscRankingBtn.style.display = 'none';
         zaladujPost(aktualnyPostIndex);
       });
     }
