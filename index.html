@@ -402,7 +402,8 @@
         statystykaZaufania = Math.max(0, statystykaZaufania - 10);
       }
 
-      if (statystykaPrawdy <= 0 || statystykaZaufania <= 0 || statystykaPrawdy >= 100 || statystykaZaufania >= 100) {
+      // Koniec gry tylko gdy któryś ze wskaźników spadnie do 0 lub mniej.
+      if (statystykaPrawdy <= 0 || statystykaZaufania <= 0) {
         uruchomEkranKoncowy('Przegrana! Wskaźniki spadły do niebezpiecznego poziomu.');
         return;
       }
