@@ -77,14 +77,17 @@
           <li class="ranking-status">Ładowanie rankingu...</li>
         </ol>
 
-        <button id="wyczysc-ranking-btn" class="przycisk przycisk-odrzuc" style="margin-top: 12px; width: 100%;">
-          🗑 Wyczyść ranking
-        </button>
+        <!-- Przycisk wyczyszczenia rankingu został przeniesiony na dół strony i stonowany (mniej widoczny). -->
       </div>
       <button class="przycisk przycisk-udostepnij" id="przycisk-restart">🔄 Zagraj ponownie</button>
     </div>
 
   </div>
+
+  <!-- Przycisk do wyczyszczenia rankingu: mniej widoczny i umieszczony na dole strony. -->
+  <button id="wyczysc-ranking-btn" class="przycisk przycisk-odrzuc" style="position:fixed; right:12px; bottom:12px; opacity:0.55; font-size:0.85rem; padding:6px 10px; border-radius:8px; background: rgba(30,41,59,0.5); color:#e2e8f0; border: none; width: auto; max-width: 220px; z-index: 1000; box-shadow: none;">
+    🗑 Wyczyść ranking
+  </button>
 
   <script>
     const bazaPostów = [
