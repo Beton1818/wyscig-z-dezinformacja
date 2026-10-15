@@ -83,7 +83,7 @@
 
   </div>
   
-  <button id="wyczysc-ranking-btn" class="przycisk przycisk-odrzuc" style="display:none; position:fixed; right:12px; bottom:12px; opacity:0.55; font-size:0.85rem; padding:6px 10px; border-radius:8px; background: rgba(30,41,59,0.5); color:#e2e8f0; border: none; width: auto; max-width: 220px; z-index: 1000; box-shadow: none;">
+  <button id="wyczysc-ranking-btn" class="przycisk przycisk-odrzuc" style="display:none; position:fixed; right:12px; bottom:12px; opacity:0.55; font-size:0.85rem; padding:6px 10px; border-radius:8[...]
     🗑 Wyczyść ranking
   </button>
 
@@ -272,14 +272,19 @@
         return;
       }
 
-      ranking.forEach((entry) => {
+      ranking.forEach((entry, i) => {
         const li = document.createElement('li');
         li.style.display = 'flex';
+        li.style.alignItems = 'center';
         li.style.justifyContent = 'space-between';
         li.style.padding = '6px 8px';
         li.style.borderBottom = '1px solid #1e293b';
         li.style.fontSize = '0.95rem';
-        li.innerHTML = `<span style="font-weight: bold; color: #f1f5f9;">${entry.nick}</span><span style="color: #38bdf8; font-weight: bold;">${entry.punkty} pkt</span>`;
+        li.innerHTML = `
+          <span style="margin-right:8px; color:#f1f5f9; font-weight:bold; width:28px; text-align:right;">${i + 1}.</span>
+          <span style="flex:1; font-weight:bold; color:#f1f5f9; margin-left:8px;">${entry.nick}</span>
+          <span style="color:#38bdf8; font-weight:bold; margin-left:12px;">${entry.punkty} pkt</span>
+        `;
         rankingLista.appendChild(li);
       });
     }
@@ -458,18 +463,8 @@
 
         const wpis = { nick, punkty: ostatniWynik };
         const ranking = zapiszRankingLokalnie(wpis);
-        rankingLista.innerHTML = '';
-
-        ranking.forEach((entry) => {
-          const li = document.createElement('li');
-          li.style.display = 'flex';
-          li.style.justifyContent = 'space-between';
-          li.style.padding = '6px 8px';
-          li.style.borderBottom = '1px solid #1e293b';
-          li.style.fontSize = '0.95rem';
-          li.innerHTML = `<span style=\"font-weight: bold; color: #f1f5f9;\">${entry.nick}</span><span style=\"color: #38bdf8; font-weight: bold;\">${entry.punkty} pkt</span>`;
-          rankingLista.appendChild(li);
-        });
+        // zamiast duplikować renderowanie listy, użyjemy istniejącej funkcji
+        pobierzIOdswiezRanking();
 
         if (zapisWynikuSekcja) {
           zapisWynikuSekcja.style.display = 'none';
