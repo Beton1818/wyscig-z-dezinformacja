@@ -64,7 +64,7 @@
     </footer>
 
     <div class="okno-modalne" id="ekran-koncowy">
-      <h2 class="tytul-modalny">Koniec Gry</h2>
+      <h2 class="tytul-modalny">Koniec Gry!</h2>
       <p class="opis-modalny" id="opis-wyniku">Opis wyniku...</p>
       <div id="zapis-wyniku-sekcja" class="sekcja-zapisu" style="display: none;">
         <input type="text" id="gracz-imie" placeholder="Wpisz swój nick..." maxlength="15">
@@ -72,19 +72,17 @@
       </div>
 
       <div class="ranking-kontener">
-        <h3 class="ranking-tytul">🏆 TOP 5 OBROŃCÓW PRAWDY</h3>
+        <h3 class="ranking-tytul">Tabela wyników</h3>
         <ol id="ranking-lista">
           <li class="ranking-status">Ładowanie rankingu...</li>
         </ol>
 
-        <!-- Przycisk wyczyszczenia rankingu został przeniesiony na dół strony i stonowany (mniej widoczny). -->
       </div>
       <button class="przycisk przycisk-udostepnij" id="przycisk-restart">🔄 Zagraj ponownie</button>
     </div>
 
   </div>
-
-  <!-- Przycisk do wyczyszczenia rankingu: mniej widoczny i umieszczony na dole strony. Ukryty domyślnie - pojawi się dopiero po zakończeniu gry. -->
+  
   <button id="wyczysc-ranking-btn" class="przycisk przycisk-odrzuc" style="display:none; position:fixed; right:12px; bottom:12px; opacity:0.55; font-size:0.85rem; padding:6px 10px; border-radius:8px; background: rgba(30,41,59,0.5); color:#e2e8f0; border: none; width: auto; max-width: 220px; z-index: 1000; box-shadow: none;">
     🗑 Wyczyść ranking
   </button>
@@ -237,9 +235,9 @@
       const ranking = pobierzRankingLokalnie();
       ranking.push(nowyWpis);
       ranking.sort((a, b) => b.punkty - a.punkty);
-      const top5 = ranking.slice(0, 5);
-      localStorage.setItem(RANKING_KEY, JSON.stringify(top5));
-      return top5;
+      const top10 = ranking.slice(0, 10);
+      localStorage.setItem(RANKING_KEY, JSON.stringify(top10));
+      return top10;
     }
 
     function kasujRankingJeżeliUprawniony() {
@@ -496,7 +494,7 @@
         ostatniWynik = 0;
         graZakonczona = false;
         if (ekranKoncowy) ekranKoncowy.style.display = 'none';
-        // ukryj przycisk wyczyszczenia rankingu przy restarcie gry
+        
         if (wyczyscRankingBtn) wyczyscRankingBtn.style.display = 'none';
         zaladujPost(aktualnyPostIndex);
       });
