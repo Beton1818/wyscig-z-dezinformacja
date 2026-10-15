@@ -83,12 +83,12 @@
 
   </div>
   
-  <button id="wyczysc-ranking-btn" class="przycisk przycisk-odrzuc" style="display:none; position:fixed; right:12px; bottom:12px; opacity:0.55; font-size:0.85rem; padding:6px 10px; border-radius:8[...]
+  <button id="wyczysc-ranking-btn" class="przycisk przycisk-odrzuc" style="display:none; position:fixed; right:12px; bottom:12px; opacity:0.55; font-size:0.85rem; padding:6px 10px; border-radius:8px;">
     🗑 Wyczyść ranking
   </button>
 
   <script>
-    const bazaPostów = [
+    const bazaPostow = [
       {
         autor: "EkoWojownik",
         handle: "@eco_warrior",
@@ -354,12 +354,17 @@
     function zaladujPost(index) {
       if (graZakonczona) return;
 
-      if (index >= bazaPostów.length) {
+      if (index >= bazaPostow.length) {
         uruchomEkranKoncowy('Gratulacje! Przetrwałeś wszystkie dni i obroniłeś sieć!');
         return;
       }
 
-      const post = bazaPostów[index];
+      const post = bazaPostow[index];
+      if (!post) {
+        console.error('Brak posta dla indeksu:', index);
+        return;
+      }
+
       if (elAwatar) elAwatar.innerText = post.awatar;
       if (elAutor) elAutor.innerText = post.autor;
       if (elHandle) elHandle.innerText = post.handle;
@@ -440,7 +445,7 @@
 
     if (przyciskOdrzuc) {
       przyciskOdrzuc.addEventListener('click', () => {
-        const post = bazaPostów[aktualnyPostIndex];
+        const post = bazaPostow[aktualnyPostIndex];
         if (!post) return;
         rozpatrzOdpowiedz(post.czyPrawda === false);
       });
@@ -448,7 +453,7 @@
 
     if (przyciskUdostepnij) {
       przyciskUdostepnij.addEventListener('click', () => {
-        const post = bazaPostów[aktualnyPostIndex];
+        const post = bazaPostow[aktualnyPostIndex];
         if (!post) return;
         rozpatrzOdpowiedz(post.czyPrawda === true);
       });
@@ -463,8 +468,7 @@
         }
 
         const wpis = { nick, punkty: ostatniWynik };
-        const ranking = zapiszRankingLokalnie(wpis);
-        // zamiast duplikować renderowanie listy, użyjemy istniejącej funkcji
+        zapiszRankingLokalnie(wpis);
         pobierzIOdswiezRanking();
 
         if (zapisWynikuSekcja) {
@@ -490,7 +494,7 @@
         ostatniWynik = 0;
         graZakonczona = false;
         if (ekranKoncowy) ekranKoncowy.style.display = 'none';
-        
+
         if (wyczyscRankingBtn) wyczyscRankingBtn.style.display = 'none';
         zaladujPost(aktualnyPostIndex);
       });
