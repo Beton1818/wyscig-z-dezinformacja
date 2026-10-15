@@ -377,7 +377,7 @@
     function nastepnyPost() {
       if (graZakonczona) return;
 
-      if (statystykaPrawdy <= 0 || statystykaZaufania <= 0 || statystykaPrawdy >= 100 || statystykaZaufania >= 100) {
+      if (statystykaPrawdy <= 0 || statystykaZaufania <= 0) {
         uruchomEkranKoncowy('Przegrana! Wskaźniki spadły do niebezpiecznego poziomu.');
         return;
       }
